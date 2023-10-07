@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Perfect Guess</title>
+</head>
+
+<body>
+    <script>
+        // //Math.floor((Math.random() * 100 ) + 1   code to generate whole number between 0 and 100
+        let number = Math.floor((Math.random() * 100) + 1)
+        let guesses = 0
+        let guess;
+        while (guess != number) {
+            guess = parseInt(prompt("Guess The Number Between 1 And 100"))
+            guesses += 1;
+            if (guess > number) {
+                alert("Guess Low Number")
+            } else if (guess < number) {
+                alert("Guess High Number")
+            }
+            else if (guess == number) {
+                alert(`You Guessed The Number In ${guesses} Chances`)
+                alert(`Your Score Is ${100 - guesses}`)
+            }
+            else {
+                alert("Error")
+            }
+        }
+    </script>
+</body>
+
+</html>
