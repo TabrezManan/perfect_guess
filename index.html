@@ -6,37 +6,77 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Perfect Guess</title>
+    <style>
+        /* Center the content on the page */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+
+        /* Style the input field */
+        #numberInput {
+            font-size: 24px;
+            padding: 10px;
+            margin-bottom: 20px;
+            width: 300px;
+            text-align: center;
+            border-radius: 10px;
+            border: 2px solid #ccc;
+        }
+
+        /* Style the button */
+        #button {
+            font-size: 24px;
+            padding: 15px 30px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 300px;
+        }
+
+        /* Add a hover effect */
+        #button:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 
 <body>
-    <input type="number" id="numberInput" placeholder="Guess The Number"/>
-    <button id="button" >Click</button>
+    <input type="number" id="numberInput" placeholder="Guess The Number" />
+    <button id="button">Click</button>
+
     <script>
-        // //Math.floor((Math.random() * 100 ) + 1   code to generate whole number between 0 and 100
-        let number = Math.floor((Math.random() * 100) + 1)
-        let guesses = 0
-        let guess;
-        let butt = document.getElementById("button")
-        while (guess != number) {
-          //  guess = parseInt(prompt("Guess The Number Between 1 And 100"))
-            butt.addEventLister("click", function() {
-                guess = document.getElementsById("numberInput").innerHTML
-            })
+        // Generate a random number between 1 and 100
+        let number = Math.floor((Math.random() * 100) + 1);
+        let guesses = 0;
+
+        // Add event listener to the button
+        document.getElementById("button").addEventListener("click", function () {
+            // Get the guessed number from the input
+            let guess = parseInt(document.getElementById("numberInput").value);
             guesses += 1;
+
+            // Check the guess
             if (guess > number) {
-                alert("Guess Low Number")
+                alert("Guess Lower!");
             } else if (guess < number) {
-                alert("Guess High Number")
+                alert("Guess Higher!");
+            } else if (guess === number) {
+                alert(`You Guessed The Number In ${guesses} Chances`);
+                alert(`Your Score Is ${100 - guesses}`);
+            } else {
+                alert("Please enter a valid number.");
             }
-            else if (guess == number) {
-                alert(`You Guessed The Number In ${guesses} Chances`)
-                alert(`Your Score Is ${100 - guesses}`)
-            }
-            else {
-                alert("Error")
-            }
-        }
+        });
     </script>
 </body>
 
 </html>
+
