@@ -9,13 +9,15 @@
 </head>
 
 <body>
+    <input type="number" id="numberInput" placeholder="Guess The Number"/>
     <script>
         // //Math.floor((Math.random() * 100 ) + 1   code to generate whole number between 0 and 100
         let number = Math.floor((Math.random() * 100) + 1)
         let guesses = 0
         let guess;
         while (guess != number) {
-            guess = parseInt(prompt("Guess The Number Between 1 And 100"))
+          //  guess = parseInt(prompt("Guess The Number Between 1 And 100"))
+            guess = document.getElementsById("numberInput").innerHTML
             guesses += 1;
             if (guess > number) {
                 alert("Guess Low Number")
