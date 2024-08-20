@@ -10,14 +10,18 @@
 
 <body>
     <input type="number" id="numberInput" placeholder="Guess The Number"/>
+    <input type="submit" id="button" value="Submit">
     <script>
         // //Math.floor((Math.random() * 100 ) + 1   code to generate whole number between 0 and 100
         let number = Math.floor((Math.random() * 100) + 1)
         let guesses = 0
         let guess;
+        let butt = document.getElementById("button")
         while (guess != number) {
           //  guess = parseInt(prompt("Guess The Number Between 1 And 100"))
-            guess = document.getElementsById("numberInput").innerHTML
+            butt.addEventLister("click", function() {
+                guess = document.getElementsById("numberInput").innerHTML
+            })
             guesses += 1;
             if (guess > number) {
                 alert("Guess Low Number")
