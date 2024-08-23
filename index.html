@@ -70,7 +70,16 @@
                 alert("Guess Higher!");
             } else if (guess === number) {
                 alert(`You Guessed The Number In ${guesses} Chances`);
-                alert(`Your Score Is ${100 - guesses}`);
+                alert(`Your Score Is ${10 - guesses}`);
+                if (guesses < 10){
+                    alert("You Won 🥳")
+                }
+                else if (guesses > 10){
+                    alert("You Lost 😅")
+                }
+                else if (guesses == 10){
+                    alert("Its A Draw 🙂")
+                }
             } else {
                 alert("Please enter a valid number.");
             }
