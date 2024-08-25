@@ -57,6 +57,11 @@
         let number = Math.floor((Math.random() * 100) + 1);
         let guesses = 0;
 
+        // Function to refocus the input field
+        function refocusInput() {
+            document.getElementById("numberInput").focus();
+        }
+
         // Add event listener to the button
         document.getElementById("button").addEventListener("click", function () {
             // Get the guessed number from the input
@@ -85,6 +90,9 @@
 
             // Clear the input field
             document.getElementById("numberInput").value = '';
+
+            // Refocus the input field to bring up the keyboard
+            refocusInput();
         });
     </script>
 </body>
