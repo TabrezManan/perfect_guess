@@ -66,28 +66,27 @@
             // Check the guess
             if (guess > number) {
                 alert("Guess Lower!");
-                guess.value = ''
             } else if (guess < number) {
                 alert("Guess Higher!");
-                guess.value = ''
             } else if (guess === number) {
                 alert(`You Guessed The Number In ${guesses} Chances`);
-                alert(`Your Score Is ${10 - guesses}`);
-                if (guesses < 10){
-                    alert("You Won 🥳")
-                }
-                else if (guesses > 10){
-                    alert("You Lost 😅")
-                }
-                else if (guesses == 10){
-                    alert("Its A Draw 🙂")
+                let score = 10 - guesses;
+                alert(`Your Score Is ${score}`);
+                if (guesses < 10) {
+                    alert("You Won 🥳");
+                } else if (guesses > 10) {
+                    alert("You Lost 😅");
+                } else {
+                    alert("It's A Draw 🙂");
                 }
             } else {
                 alert("Please enter a valid number.");
             }
+
+            // Clear the input field
+            document.getElementById("numberInput").value = '';
         });
     </script>
 </body>
 
 </html>
-
