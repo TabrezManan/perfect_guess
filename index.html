@@ -45,12 +45,58 @@
         #button:hover {
             background-color: #45a049;
         }
+
+        /* Style the custom alert box */
+        #customAlert {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            z-index: 1000;
+            text-align: center;
+        }
+
+        #customAlert p {
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        #customAlert button {
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #customAlert button:hover {
+            background-color: #45a049;
+        }
+
+        /* Dim the background when alert is active */
+        body.dimmed {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
     </style>
 </head>
 
 <body>
     <input type="number" id="numberInput" placeholder="Guess The Number" />
     <button id="button">Click</button>
+
+    <!-- Custom Alert Box -->
+    <div id="customAlert">
+        <p id="alertText"></p>
+        <button onclick="closeAlert()">OK</button>
+    </div>
 
     <script>
         // Generate a random number between 1 and 100
@@ -59,7 +105,23 @@
 
         // Function to refocus the input field
         function refocusInput() {
-            document.getElementById("numberInput").focus();
+            setTimeout(() => {
+                document.getElementById("numberInput").focus();
+            }, 500); // delay of 500ms
+        }
+
+        // Function to show the custom alert
+        function showAlert(message) {
+            document.getElementById("alertText").innerText = message;
+            document.getElementById("customAlert").style.display = 'block';
+            document.body.classList.add('dimmed');  // Dim the background
+        }
+
+        // Function to close the custom alert
+        function closeAlert() {
+            document.getElementById("customAlert").style.display = 'none';
+            document.body.classList.remove('dimmed');  // Restore background
+            refocusInput();
         }
 
         // Add event listener to the button
@@ -70,29 +132,30 @@
 
             // Check the guess
             if (guess > number) {
-                alert("Guess Lower!");
+                showAlert("Guess Lower!");
             } else if (guess < number) {
-                alert("Guess Higher!");
+                showAlert("Guess Higher!");
             } else if (guess === number) {
-                alert(`You Guessed The Number In ${guesses} Chances`);
-                let score = 10 - guesses;
-                alert(`Your Score Is ${score}`);
-                if (guesses < 10) {
-                    alert("You Won 🥳");
-                } else if (guesses > 10) {
-                    alert("You Lost 😅");
-                } else {
-                    alert("It's A Draw 🙂");
-                }
+                showAlert(`You Guessed The Number In ${guesses} Chances`);
+                setTimeout(() => {
+                    let score = 10 - guesses;
+                    showAlert(`Your Score Is ${score}`);
+                    setTimeout(() => {
+                        if (guesses < 10) {
+                            showAlert("You Won 🥳");
+                        } else if (guesses > 10) {
+                            showAlert("You Lost 😅");
+                        } else {
+                            showAlert("It's A Draw 🙂");
+                        }
+                    }, 1000);
+                }, 1000);
             } else {
-                alert("Please enter a valid number.");
+                showAlert("Please enter a valid number.");
             }
 
             // Clear the input field
             document.getElementById("numberInput").value = '';
-
-            // Refocus the input field to bring up the keyboard
-            refocusInput();
         });
     </script>
 </body>
