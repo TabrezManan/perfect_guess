@@ -66,8 +66,10 @@
             // Check the guess
             if (guess > number) {
                 alert("Guess Lower!");
+                guess.value = ''
             } else if (guess < number) {
                 alert("Guess Higher!");
+                guess.value = ''
             } else if (guess === number) {
                 alert(`You Guessed The Number In ${guesses} Chances`);
                 alert(`Your Score Is ${10 - guesses}`);
