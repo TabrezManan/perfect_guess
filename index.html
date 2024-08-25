@@ -51,7 +51,7 @@
             display: none;
             position: fixed;
             top: 10%;
-            left: 50%;
+            left: 70%;
             transform: translate(-50%, -50%);
             background-color: white;
             padding: 20px;
@@ -107,7 +107,7 @@
         function refocusInput() {
             setTimeout(() => {
                 document.getElementById("numberInput").focus();
-            }, 500); // delay of 500ms
+            }, 200); // delay of 200ms
         }
 
         // Function to show the custom alert
@@ -121,7 +121,6 @@
         function closeAlert() {
             document.getElementById("customAlert").style.display = 'none';
             document.body.classList.remove('dimmed');  // Restore background
-            refocusInput();
         }
 
         // Add event listener to the button
@@ -156,6 +155,7 @@
 
             // Clear the input field
             document.getElementById("numberInput").value = '';
+            refocusInput();
         });
     </script>
 </body>
