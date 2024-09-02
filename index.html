@@ -29,8 +29,9 @@
             border: 2px solid #ccc;
         }
 
-        /* Style the button */
-        #button {
+        /* Style the buttons */
+        #button,
+        #showScoreButton {
             font-size: 24px;
             padding: 15px 30px;
             background-color: #4CAF50;
@@ -39,11 +40,18 @@
             border-radius: 10px;
             cursor: pointer;
             width: 300px;
+            margin-top: 20px;
         }
 
         /* Add a hover effect */
-        #button:hover {
+        #button:hover,
+        #showScoreButton:hover {
             background-color: #45a049;
+        }
+
+        /* Hide the Show Score button initially */
+        #showScoreButton {
+            display: none;
         }
 
         /* Style the custom alert box */
@@ -85,13 +93,13 @@
         body.dimmed {
             background-color: rgba(0, 0, 0, 0.5);
         }
-
     </style>
 </head>
 
 <body>
     <input type="number" id="numberInput" placeholder="Guess The Number" />
     <button id="button">Click</button>
+    <button id="showScoreButton">Show Score</button>
 
     <!-- Custom Alert Box -->
     <div id="customAlert">
@@ -103,6 +111,7 @@
         // Generate a random number between 1 and 100
         let number = Math.floor((Math.random() * 100) + 1);
         let guesses = 0;
+        let score = 0;
 
         // Function to refocus the input field
         function refocusInput() {
@@ -138,8 +147,9 @@
             } else if (guess === number) {
                 showAlert(`You Guessed The Number In ${guesses} Chances`);
                 setTimeout(() => {
-                    let score = 10 - guesses;
+                    score = 10 - guesses;
                     showAlert(`Your Score Is ${score}`);
+                    document.getElementById("showScoreButton").style.display = 'block'; // Show the score button
                     setTimeout(() => {
                         if (guesses < 10) {
                             showAlert("You Won 🥳");
@@ -157,6 +167,11 @@
             // Clear the input field
             document.getElementById("numberInput").value = '';
             refocusInput();
+        });
+
+        // Add event listener to the Show Score button
+        document.getElementById("showScoreButton").addEventListener("click", function () {
+            showAlert(`Your Score Is ${score}`);
         });
     </script>
 </body>
