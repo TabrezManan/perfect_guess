@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Perfect Guess</title>
     <style>
-        /* Center the content on the page */
+        /* Hide the body initially */
         body {
             display: flex;
             justify-content: center;
@@ -16,7 +16,7 @@
             flex-direction: column;
             font-family: Arial, sans-serif;
             background-color: #f0f0f0;
-            visibility: hidden; /* Hide the body initially */
+            visibility: hidden; /* Hide body initially */
         }
 
         /* Style the input field */
@@ -181,15 +181,20 @@
         // Function to show the chance selection box
         function showChanceSelection() {
             document.getElementById("chanceSelection").style.display = 'block';
-            document.getElementById("chanceSelection").style.top = '50%';
+            setTimeout(() => {
+                document.getElementById("chanceSelection").style.top = '20%';
+            }, 100);
         }
 
         // Function to set the number of chances
         function setChances(chances) {
             maxChances = chances;
             document.getElementById("chanceSelection").style.top = '-100%'; // Slide up and hide
-            document.body.style.visibility = 'visible'; // Reveal the body content
-            refocusInput();
+            setTimeout(() => {
+                document.getElementById("chanceSelection").style.display = 'none';
+                document.body.style.visibility = 'visible'; // Reveal the body content
+                refocusInput();
+            }, 500);
         }
 
         // Show the chance selection on page load
