@@ -28,21 +28,12 @@
             text-align: center;
             border-radius: 10px;
             border: 2px solid #ccc;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            transition: box-shadow 0.3s ease-in-out;
-        }
-
-        #numberInput:focus,
-        #chancesInput:focus {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            border-color: #4CAF50;
         }
 
         /* Style the buttons */
         #button,
-        #setChancesButton,
         #showScoreButton,
-        #retryButton {
+        #startGameButton {
             font-size: 24px;
             padding: 15px 30px;
             background-color: #4CAF50;
@@ -52,51 +43,46 @@
             cursor: pointer;
             width: 300px;
             margin-top: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            transition: transform 0.2s ease-in-out, box-shadow 0.3s ease-in-out;
         }
 
+        /* Add a hover effect */
         #button:hover,
-        #setChancesButton:hover,
         #showScoreButton:hover,
-        #retryButton:hover {
+        #startGameButton:hover {
             background-color: #45a049;
-            transform: scale(1.05);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
         }
 
-        /* Hide the number input, retry button, and Show Score button initially */
-        #numberInput,
+        /* Hide the buttons initially */
         #button,
-        #showScoreButton,
-        #retryButton {
+        #showScoreButton {
             display: none;
         }
 
-        /* Style the custom alert box */
-        #customAlert {
+        /* Style the custom alert and prompt boxes */
+        #customAlert,
+        #chancesPrompt {
             display: none;
             position: fixed;
-            top: 50%;
+            top: 10%;
             left: 50%;
             transform: translate(-50%, -50%);
             background-color: white;
             padding: 20px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
             border-radius: 10px;
             z-index: 1000;
             text-align: center;
             width: 80%;
-            max-width: 400px;
-            animation: popUp 0.3s ease-in-out;
         }
 
-        #customAlert p {
+        #customAlert p,
+        #chancesPrompt p {
             margin-bottom: 20px;
             font-size: 18px;
         }
 
-        #customAlert button {
+        #customAlert button,
+        #chancesPrompt button {
             padding: 10px 20px;
             font-size: 18px;
             background-color: #4CAF50;
@@ -104,10 +90,10 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.2s ease-in-out;
         }
 
-        #customAlert button:hover {
+        #customAlert button:hover,
+        #chancesPrompt button:hover {
             background-color: #45a049;
         }
 
@@ -115,29 +101,13 @@
         body.dimmed {
             background-color: rgba(0, 0, 0, 0.5);
         }
-
-        /* Animation for pop-up */
-        @keyframes popUp {
-            0% {
-                transform: translate(-50%, -50%) scale(0.5);
-                opacity: 0;
-            }
-            100% {
-                transform: translate(-50%, -50%) scale(1);
-                opacity: 1;
-            }
-        }
     </style>
 </head>
 
 <body>
-    <input type="number" id="chancesInput" placeholder="Enter Number of Chances" />
-    <button id="setChancesButton">Set Chances</button>
-
-    <input type="number" id="numberInput" placeholder="Guess The Number" />
+    <input type="number" id="numberInput" placeholder="Guess The Number" disabled />
     <button id="button">Click</button>
     <button id="showScoreButton">Show Score</button>
-    <button id="retryButton">Retry</button>
 
     <!-- Custom Alert Box -->
     <div id="customAlert">
@@ -145,18 +115,19 @@
         <button onclick="closeAlert()">OK</button>
     </div>
 
+    <!-- Chances Prompt Box -->
+    <div id="chancesPrompt">
+        <p>Enter the number of chances you want:</p>
+        <input type="number" id="chancesInput" placeholder="Number of Chances" />
+        <button id="startGameButton">Start Game</button>
+    </div>
+
     <script>
+        // Generate a random number between 1 and 100
         let number = Math.floor((Math.random() * 100) + 1);
         let guesses = 0;
         let score = 0;
-        let maxChances;
-
-        // Function to refocus the input field
-        function refocusInput(inputId) {
-            setTimeout(() => {
-                document.getElementById(inputId).focus();
-            }, 200); // delay of 200ms
-        }
+        let maxChances = 0;
 
         // Function to show the custom alert
         function showAlert(message) {
@@ -171,38 +142,21 @@
             document.body.classList.remove('dimmed');  // Restore background
         }
 
-        // Reset game function
-        function resetGame() {
-            number = Math.floor((Math.random() * 100) + 1);
-            guesses = 0;
-            score = 0;
-            document.getElementById("numberInput").style.display = 'none';
-            document.getElementById("button").style.display = 'none';
-            document.getElementById("showScoreButton").style.display = 'none';
-            document.getElementById("retryButton").style.display = 'none';
-            document.getElementById("chancesInput").style.display = 'block';
-            document.getElementById("setChancesButton").style.display = 'block';
-            document.getElementById("chancesInput").value = '';
-            refocusInput("chancesInput");
+        // Function to start the game
+        function startGame() {
+            maxChances = parseInt(document.getElementById("chancesInput").value);
+            if (isNaN(maxChances) || maxChances <= 0) {
+                showAlert("Please enter a valid number of chances.");
+            } else {
+                document.getElementById("chancesPrompt").style.display = 'none';
+                document.body.classList.remove('dimmed');
+                document.getElementById("button").style.display = 'block';  // Show the main button
+                document.getElementById("numberInput").disabled = false;  // Enable the input field
+            }
         }
 
-        // Add event listener to the Set Chances button
-        document.getElementById("setChancesButton").addEventListener("click", function () {
-            maxChances = parseInt(document.getElementById("chancesInput").value);
-
-            if (!isNaN(maxChances) && maxChances > 0) {
-                document.getElementById("chancesInput").style.display = 'none';
-                document.getElementById("setChancesButton").style.display = 'none';
-                document.getElementById("numberInput").style.display = 'block';
-                document.getElementById("button").style.display = 'block';
-                refocusInput("numberInput");
-            } else {
-                showAlert("Please enter a valid number of chances.");
-            }
-        });
-
-        // Add event listener to the Guess button
-        document.getElementById("button").addEventListener("click", function () {
+        // Function to check the guess
+        function checkGuess() {
             let guess = parseInt(document.getElementById("numberInput").value);
             guesses += 1;
 
@@ -211,43 +165,41 @@
             } else if (guess < number) {
                 showAlert("Guess Higher!");
             } else if (guess === number) {
-                score = maxChances - guesses + 1;
-                showAlert(`You Guessed The Number In ${guesses} Chances. Your Score Is ${score}`);
-                document.getElementById("showScoreButton").style.display = 'block'; // Show the score button
+                showAlert(`You Guessed The Number In ${guesses} Chances`);
                 setTimeout(() => {
-                    if (guesses <= maxChances) {
-                        showAlert("You Won 🥳");
-                    } else {
-                        showAlert("You Lost 😅");
-                    }
-                    document.getElementById("retryButton").style.display = 'block'; // Show the retry button
+                    score = maxChances - guesses;
+                    showAlert(`Your Score Is ${score}`);
+                    document.getElementById("showScoreButton").style.display = 'block'; // Show the score button
+                    setTimeout(() => {
+                        if (guesses <= maxChances) {
+                            showAlert("You Won 🥳");
+                        } else {
+                            showAlert("You Lost 😅");
+                        }
+                    }, 1000);
                 }, 1000);
             } else {
                 showAlert("Please enter a valid number.");
             }
 
-            // Check if chances are exhausted
-            if (guesses >= maxChances && guess !== number) {
-                showAlert("You Lost 😅");
-                document.getElementById("retryButton").style.display = 'block'; // Show the retry button
-                setTimeout(() => {
-                    showAlert("The correct number was " + number);
-                }, 1000);
-            }
-
+            // Clear the input field
             document.getElementById("numberInput").value = '';
-            refocusInput("numberInput");
-        });
+        }
 
-        // Add event listener to the Retry button
-        document.getElementById("retryButton").addEventListener("click", function () {
-            resetGame();
-        });
+        // Event listener for the Start Game button
+        document.getElementById("startGameButton").addEventListener("click", startGame);
 
-        // Add event listener to the Show Score button
+        // Event listener for the main game button
+        document.getElementById("button").addEventListener("click", checkGuess);
+
+        // Event listener for the Show Score button
         document.getElementById("showScoreButton").addEventListener("click", function () {
             showAlert(`Your Score Is ${score}`);
         });
+
+        // Show the chances prompt on page load
+        document.getElementById("chancesPrompt").style.display = 'block';
+        document.body.classList.add('dimmed');  // Dim the background while asking for chances
     </script>
 </body>
 
