@@ -16,11 +16,11 @@
             flex-direction: column;
             font-family: Arial, sans-serif;
             background-color: #f0f0f0;
+            overflow: hidden; /* Prevent scrolling */
         }
 
         /* Style the input fields */
-        #numberInput,
-        #chancesInput {
+        #numberInput {
             font-size: 24px;
             padding: 10px;
             margin-bottom: 20px;
@@ -32,8 +32,7 @@
 
         /* Style the buttons */
         #button,
-        #showScoreButton,
-        #startGameButton {
+        #showScoreButton {
             font-size: 24px;
             padding: 15px 30px;
             background-color: #4CAF50;
@@ -47,8 +46,7 @@
 
         /* Add a hover effect */
         #button:hover,
-        #showScoreButton:hover,
-        #startGameButton:hover {
+        #showScoreButton:hover {
             background-color: #45a049;
         }
 
@@ -97,7 +95,38 @@
             background-color: #45a049;
         }
 
-        /* Dim the background when alert is active */
+        /* Style the chance selection pop-up */
+        #chancesOptions {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 10px 10px 0 0;
+            z-index: 1000;
+            width: 100%;
+            text-align: center;
+        }
+
+        #chancesOptions button {
+            font-size: 24px;
+            padding: 15px 30px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        #chancesOptions button:hover {
+            background-color: #45a049;
+        }
+
+        /* Dim the background when alert or options are active */
         body.dimmed {
             background-color: rgba(0, 0, 0, 0.5);
         }
@@ -115,11 +144,12 @@
         <button onclick="closeAlert()">OK</button>
     </div>
 
-    <!-- Chances Prompt Box -->
-    <div id="chancesPrompt">
-        <p>Enter the number of chances you want:</p>
-        <input type="number" id="chancesInput" placeholder="Number of Chances" />
-        <button id="startGameButton">Start Game</button>
+    <!-- Chance Selection Box -->
+    <div id="chancesOptions">
+        <p>Select the number of chances:</p>
+        <button onclick="startGame(5)">5 Chances</button>
+        <button onclick="startGame(10)">10 Chances</button>
+        <button onclick="startGame(15)">15 Chances</button>
     </div>
 
     <script>
@@ -140,19 +170,17 @@
         function closeAlert() {
             document.getElementById("customAlert").style.display = 'none';
             document.body.classList.remove('dimmed');  // Restore background
+            refocusInput();  // Refocus input field after closing alert
         }
 
-        // Function to start the game
-        function startGame() {
-            maxChances = parseInt(document.getElementById("chancesInput").value);
-            if (isNaN(maxChances) || maxChances <= 0) {
-                showAlert("Please enter a valid number of chances.");
-            } else {
-                document.getElementById("chancesPrompt").style.display = 'none';
-                document.body.classList.remove('dimmed');
-                document.getElementById("button").style.display = 'block';  // Show the main button
-                document.getElementById("numberInput").disabled = false;  // Enable the input field
-            }
+        // Function to start the game with a given number of chances
+        function startGame(chances) {
+            maxChances = chances;
+            document.getElementById("chancesOptions").style.display = 'none';
+            document.body.classList.remove('dimmed');
+            document.getElementById("button").style.display = 'block';  // Show the main button
+            document.getElementById("numberInput").disabled = false;  // Enable the input field
+            refocusInput();  // Auto-focus the input field
         }
 
         // Function to check the guess
@@ -186,8 +214,12 @@
             document.getElementById("numberInput").value = '';
         }
 
-        // Event listener for the Start Game button
-        document.getElementById("startGameButton").addEventListener("click", startGame);
+        // Function to refocus the input field
+        function refocusInput() {
+            setTimeout(() => {
+                document.getElementById("numberInput").focus();
+            }, 200); // delay of 200ms
+        }
 
         // Event listener for the main game button
         document.getElementById("button").addEventListener("click", checkGuess);
@@ -197,8 +229,8 @@
             showAlert(`Your Score Is ${score}`);
         });
 
-        // Show the chances prompt on page load
-        document.getElementById("chancesPrompt").style.display = 'block';
+        // Show the chances options on page load
+        document.getElementById("chancesOptions").style.display = 'block';
         document.body.classList.add('dimmed');  // Dim the background while asking for chances
     </script>
 </body>
