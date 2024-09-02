@@ -58,12 +58,11 @@
 
         /* Style the custom alert and prompt boxes */
         #customAlert,
-        #chancesPrompt {
+        #chancesOptions {
             display: none;
             position: fixed;
-            top: 10%;
             left: 50%;
-            transform: translate(-50%, -50%);
+            transform: translateX(-50%);
             background-color: white;
             padding: 20px;
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
@@ -74,13 +73,13 @@
         }
 
         #customAlert p,
-        #chancesPrompt p {
+        #chancesOptions p {
             margin-bottom: 20px;
             font-size: 18px;
         }
 
         #customAlert button,
-        #chancesPrompt button {
+        #chancesOptions button {
             padding: 10px 20px;
             font-size: 18px;
             background-color: #4CAF50;
@@ -91,39 +90,24 @@
         }
 
         #customAlert button:hover,
-        #chancesPrompt button:hover {
+        #chancesOptions button:hover {
             background-color: #45a049;
         }
 
         /* Style the chance selection pop-up */
         #chancesOptions {
-            display: none;
-            position: fixed;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: white;
-            padding: 20px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-            border-radius: 10px 10px 0 0;
-            z-index: 1000;
-            width: 100%;
-            text-align: center;
+            top: 0;
+            transform: translateY(0);
+            animation: slideDown 0.5s ease-in-out;
         }
 
-        #chancesOptions button {
-            font-size: 24px;
-            padding: 15px 30px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            margin: 10px;
-        }
-
-        #chancesOptions button:hover {
-            background-color: #45a049;
+        @keyframes slideDown {
+            from {
+                top: -100px; /* Hide it above the screen */
+            }
+            to {
+                top: 0; /* Slide into view */
+            }
         }
 
         /* Dim the background when alert or options are active */
