@@ -7,16 +7,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Perfect Guess</title>
     <style>
-        /* Hide the body initially */
-        body {
-            display: flex;
+        /* Hide the body content initially */
+        #mainContent {
+            display: none;
             justify-content: center;
             align-items: center;
             height: 100vh;
             flex-direction: column;
             font-family: Arial, sans-serif;
             background-color: #f0f0f0;
-            visibility: hidden; /* Hide body initially */
         }
 
         /* Style the input field */
@@ -97,7 +96,6 @@
 
         /* Style the chance selection box */
         #chanceSelection {
-            display: none;
             position: fixed;
             top: -100%;
             left: 0;
@@ -133,22 +131,25 @@
 </head>
 
 <body>
-    <input type="number" id="numberInput" placeholder="Guess The Number" />
-    <button id="button">Click</button>
-    <button id="showScoreButton">Show Score</button>
-
-    <!-- Custom Alert Box -->
-    <div id="customAlert">
-        <p id="alertText"></p>
-        <button onclick="closeAlert()">OK</button>
-    </div>
-
     <!-- Chance Selection Box -->
     <div id="chanceSelection">
         <p>Select Number of Chances:</p>
         <button onclick="setChances(5)">5</button>
         <button onclick="setChances(10)">10</button>
         <button onclick="setChances(15)">15</button>
+    </div>
+
+    <!-- Main Game Content -->
+    <div id="mainContent">
+        <input type="number" id="numberInput" placeholder="Guess The Number" />
+        <button id="button">Click</button>
+        <button id="showScoreButton">Show Score</button>
+
+        <!-- Custom Alert Box -->
+        <div id="customAlert">
+            <p id="alertText"></p>
+            <button onclick="closeAlert()">OK</button>
+        </div>
     </div>
 
     <script>
@@ -180,10 +181,7 @@
 
         // Function to show the chance selection box
         function showChanceSelection() {
-            document.getElementById("chanceSelection").style.display = 'block';
-            setTimeout(() => {
-                document.getElementById("chanceSelection").style.top = '20%';
-            }, 100);
+            document.getElementById("chanceSelection").style.top = '20%';
         }
 
         // Function to set the number of chances
@@ -191,8 +189,7 @@
             maxChances = chances;
             document.getElementById("chanceSelection").style.top = '-100%'; // Slide up and hide
             setTimeout(() => {
-                document.getElementById("chanceSelection").style.display = 'none';
-                document.body.style.visibility = 'visible'; // Reveal the body content
+                document.getElementById("mainContent").style.display = 'flex'; // Show the main content
                 refocusInput();
             }, 500);
         }
