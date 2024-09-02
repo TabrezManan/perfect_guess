@@ -7,35 +7,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Perfect Guess</title>
     <style>
-        /* Hide the body content initially */
-        #mainContent {
-            display: none;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            flex-direction: column;
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-        }
-
-        /* Style the input field */
-        #numberInput {
+        /* Existing styles... */
+        /* Add styles for turn indicators and hints */
+        #playerTurn {
             font-size: 24px;
-            padding: 10px;
             margin-bottom: 20px;
-            width: 300px;
-            text-align: center;
-            border-radius: 10px;
-            border: 2px solid #ccc;
         }
 
-        /* Style the buttons */
-        #button,
-        #retryButton,
-        #showScoreButton {
+        #hintButton {
             font-size: 24px;
             padding: 15px 30px;
-            background-color: #4CAF50;
+            background-color: #2196F3;
             color: white;
             border: none;
             border-radius: 10px;
@@ -44,24 +26,14 @@
             margin-top: 20px;
         }
 
-        /* Add a hover effect */
-        #button:hover,
-        #retryButton:hover,
-        #showScoreButton:hover {
-            background-color: #45a049;
+        #hintButton:hover {
+            background-color: #0b7dda;
         }
 
-        /* Hide the Show Score and Retry buttons initially */
-        #showScoreButton,
-        #retryButton {
-            display: none;
-        }
-
-        /* Style the custom alert box */
-        #customAlert {
+        #leaderboard {
             display: none;
             position: fixed;
-            top: 10%;
+            top: 20%;
             left: 50%;
             transform: translate(-50%, -50%);
             background-color: white;
@@ -73,50 +45,12 @@
             width: 80%;
         }
 
-        #customAlert p {
-            margin-bottom: 20px;
-            font-size: 18px;
-        }
-
-        #customAlert button {
-            padding: 10px 20px;
-            font-size: 18px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        #customAlert button:hover {
-            background-color: #45a049;
-        }
-
-        /* Dim the background when alert is active */
-        body.dimmed {
-            background-color: rgba(0, 0, 0, 0.5);
-        }
-
-        /* Style the chance selection box */
-        #chanceSelection {
-            position: fixed;
-            top: -100%;
-            left: 0;
-            right: 0;
-            background-color: white;
-            padding: 20px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-            text-align: center;
-            z-index: 1000;
-            transition: top 0.5s ease;
-        }
-
-        #chanceSelection p {
+        #leaderboard p {
             font-size: 20px;
             margin-bottom: 20px;
         }
 
-        #chanceSelection button {
+        #leaderboard button {
             font-size: 18px;
             padding: 10px 20px;
             background-color: #4CAF50;
@@ -124,10 +58,9 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            margin: 0 10px;
         }
 
-        #chanceSelection button:hover {
+        #leaderboard button:hover {
             background-color: #45a049;
         }
     </style>
@@ -144,23 +77,35 @@
 
     <!-- Main Game Content -->
     <div id="mainContent">
+        <p id="playerTurn">Player 1's Turn</p>
         <input type="number" id="numberInput" placeholder="Guess The Number" />
         <button id="button">Click</button>
+        <button id="hintButton">Hint</button>
         <button id="retryButton">Retry</button>
         <button id="showScoreButton">Show Score</button>
+        <button id="showLeaderboardButton">Show Leaderboard</button>
 
         <!-- Custom Alert Box -->
         <div id="customAlert">
             <p id="alertText"></p>
             <button onclick="closeAlert()">OK</button>
         </div>
+
+        <!-- Leaderboard Box -->
+        <div id="leaderboard">
+            <p id="leaderboardText"></p>
+            <button onclick="closeLeaderboard()">Close</button>
+        </div>
     </div>
 
     <script>
         let number = Math.floor((Math.random() * 100) + 1);
         let guesses = 0;
-        let score = 0;
+        let score = { player1: 0, player2: 0 };
         let maxChances = 10; // Default to 10 chances if none is selected
+        let currentPlayer = 'player1';
+        let hintsUsed = 0;
+        const maxHints = 3;
 
         function refocusInput() {
             setTimeout(() => {
@@ -179,6 +124,45 @@
             document.body.classList.remove('dimmed');
         }
 
+        function showLeaderboard() {
+            const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+            let leaderboardText = '<p>Leaderboard:</p>';
+            leaderboard.forEach((entry, index) => {
+                leaderboardText += `<p>${index + 1}. ${entry.name}: ${entry.score}</p>`;
+            });
+            document.getElementById("leaderboardText").innerHTML = leaderboardText;
+            document.getElementById("leaderboard").style.display = 'block';
+            document.body.classList.add('dimmed');
+        }
+
+        function closeLeaderboard() {
+            document.getElementById("leaderboard").style.display = 'none';
+            document.body.classList.remove('dimmed');
+        }
+
+        function saveScore(name, score) {
+            let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+            leaderboard.push({ name, score });
+            leaderboard.sort((a, b) => b.score - a.score);
+            leaderboard = leaderboard.slice(0, 10); // Keep top 10 scores
+            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+        }
+
+        function giveHint() {
+            if (hintsUsed >= maxHints) {
+                showAlert("No more hints available.");
+                return;
+            }
+            let hint;
+            if (number <= 50) {
+                hint = "The number is less than or equal to 50.";
+            } else {
+                hint = "The number is greater than 50.";
+            }
+            hintsUsed += 1;
+            showAlert(hint);
+        }
+
         function showChanceSelection() {
             document.getElementById("chanceSelection").style.top = '20%';
         }
@@ -195,11 +179,21 @@
         function resetGame() {
             number = Math.floor((Math.random() * 100) + 1);
             guesses = 0;
-            score = 0;
+            score = { player1: 0, player2: 0 };
+            hintsUsed = 0;
             document.getElementById("numberInput").value = '';
             document.getElementById("retryButton").style.display = 'none';
             document.getElementById("showScoreButton").style.display = 'none';
+            document.getElementById("showLeaderboardButton").style.display = 'none';
+            document.getElementById("playerTurn").innerText = "Player 1's Turn";
+            currentPlayer = 'player1';
+            document.body.style.backgroundColor = '#f0f0f0'; // Reset background color
             refocusInput();
+        }
+
+        function switchPlayer() {
+            currentPlayer = currentPlayer === 'player1' ? 'player2' : 'player1';
+            document.getElementById("playerTurn").innerText = `${currentPlayer === 'player1' ? "Player 1's" : "Player 2's"} Turn`;
         }
 
         window.onload = function () {
@@ -209,32 +203,39 @@
         document.getElementById("button").addEventListener("click", function () {
             let guess = parseInt(document.getElementById("numberInput").value);
             guesses += 1;
+            score[currentPlayer] += 1;
 
             if (guess > number) {
+                document.body.style.backgroundColor = '#FFDDDD'; // Red for too high
                 showAlert("Guess Lower!");
             } else if (guess < number) {
+                document.body.style.backgroundColor = '#DDFFDD'; // Green for too low
                 showAlert("Guess Higher!");
             } else if (guess === number) {
-                score = maxChances - guesses;
-                showAlert(`You Guessed The Number In ${guesses} Chances`);
+                document.body.style.backgroundColor = '#DDFFDD'; // Green for correct
+                showAlert(`${currentPlayer === 'player1' ? "Player 1" : "Player 2"} Guessed The Number In ${score[currentPlayer]} Chances`);
                 setTimeout(() => {
-                    showAlert(`Your Score Is ${score}`);
+                    showAlert(`The Correct Number Was ${number}`);
                     document.getElementById("showScoreButton").style.display = 'block';
                     document.getElementById("retryButton").style.display = 'block';
+                    document.getElementById("showLeaderboardButton").style.display = 'block';
+                    saveScore(prompt('Enter your name:'), score[currentPlayer]);
                 }, 1000);
             } else {
                 showAlert("Please enter a valid number.");
             }
 
-            if (guesses >= maxChances && guess !== number) {
+            if (guesses >= maxChances) {
                 setTimeout(() => {
-                    showAlert(`You Lost! The Correct Number Was ${number}`);
+                    showAlert(`${currentPlayer === 'player1' ? "Player 1" : "Player 2"} Lost! The Correct Number Was ${number}`);
                     document.getElementById("retryButton").style.display = 'block';
+                    document.getElementById("showLeaderboardButton").style.display = 'block';
                 }, 500);
             }
 
             document.getElementById("numberInput").value = '';
             refocusInput();
+            switchPlayer();
         });
 
         document.getElementById("retryButton").addEventListener("click", function () {
@@ -242,7 +243,15 @@
         });
 
         document.getElementById("showScoreButton").addEventListener("click", function () {
-            showAlert(`Your Score Is ${score}`);
+            showAlert(`Player 1 Score: ${score.player1}, Player 2 Score: ${score.player2}`);
+        });
+
+        document.getElementById("showLeaderboardButton").addEventListener("click", function () {
+            showLeaderboard();
+        });
+
+        document.getElementById("hintButton").addEventListener("click", function () {
+            giveHint();
         });
     </script>
 </body>
