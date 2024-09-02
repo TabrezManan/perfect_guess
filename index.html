@@ -31,6 +31,7 @@
 
         /* Style the buttons */
         #button,
+        #retryButton,
         #showScoreButton {
             font-size: 24px;
             padding: 15px 30px;
@@ -45,12 +46,14 @@
 
         /* Add a hover effect */
         #button:hover,
+        #retryButton:hover,
         #showScoreButton:hover {
             background-color: #45a049;
         }
 
-        /* Hide the Show Score button initially */
-        #showScoreButton {
+        /* Hide the Show Score and Retry buttons initially */
+        #showScoreButton,
+        #retryButton {
             display: none;
         }
 
@@ -135,14 +138,15 @@
     <div id="chanceSelection">
         <p>Select Number of Chances:</p>
         <button onclick="setChances(5)">5</button>
+        <button onclick="setChances(7)">7</button>
         <button onclick="setChances(10)">10</button>
-        <button onclick="setChances(15)">15</button>
     </div>
 
     <!-- Main Game Content -->
     <div id="mainContent">
         <input type="number" id="numberInput" placeholder="Guess The Number" />
         <button id="button">Click</button>
+        <button id="retryButton">Retry</button>
         <button id="showScoreButton">Show Score</button>
 
         <!-- Custom Alert Box -->
@@ -153,87 +157,90 @@
     </div>
 
     <script>
-        // Generate a random number between 1 and 100
         let number = Math.floor((Math.random() * 100) + 1);
         let guesses = 0;
         let score = 0;
-        let maxChances = 10;  // Default to 10 chances if none is selected
+        let maxChances = 10; // Default to 10 chances if none is selected
 
-        // Function to refocus the input field
         function refocusInput() {
             setTimeout(() => {
                 document.getElementById("numberInput").focus();
-            }, 200); // delay of 200ms
+            }, 200);
         }
 
-        // Function to show the custom alert
         function showAlert(message) {
             document.getElementById("alertText").innerText = message;
             document.getElementById("customAlert").style.display = 'block';
-            document.body.classList.add('dimmed');  // Dim the background
+            document.body.classList.add('dimmed');
         }
 
-        // Function to close the custom alert
         function closeAlert() {
             document.getElementById("customAlert").style.display = 'none';
-            document.body.classList.remove('dimmed');  // Restore background
+            document.body.classList.remove('dimmed');
         }
 
-        // Function to show the chance selection box
         function showChanceSelection() {
             document.getElementById("chanceSelection").style.top = '20%';
         }
 
-        // Function to set the number of chances
         function setChances(chances) {
             maxChances = chances;
-            document.getElementById("chanceSelection").style.top = '-100%'; // Slide up and hide
+            document.getElementById("chanceSelection").style.top = '-100%';
             setTimeout(() => {
-                document.getElementById("mainContent").style.display = 'flex'; // Show the main content
+                document.getElementById("mainContent").style.display = 'flex';
                 refocusInput();
             }, 500);
         }
 
-        // Show the chance selection on page load
+        function resetGame() {
+            number = Math.floor((Math.random() * 100) + 1);
+            guesses = 0;
+            score = 0;
+            document.getElementById("numberInput").value = '';
+            document.getElementById("retryButton").style.display = 'none';
+            document.getElementById("showScoreButton").style.display = 'none';
+            refocusInput();
+        }
+
         window.onload = function () {
             showChanceSelection();
         };
 
-        // Add event listener to the button
         document.getElementById("button").addEventListener("click", function () {
-            // Get the guessed number from the input
             let guess = parseInt(document.getElementById("numberInput").value);
             guesses += 1;
 
-            // Check the guess
             if (guess > number) {
                 showAlert("Guess Lower!");
             } else if (guess < number) {
                 showAlert("Guess Higher!");
             } else if (guess === number) {
+                score = maxChances - guesses;
                 showAlert(`You Guessed The Number In ${guesses} Chances`);
                 setTimeout(() => {
-                    score = maxChances - guesses;
                     showAlert(`Your Score Is ${score}`);
-                    document.getElementById("showScoreButton").style.display = 'block'; // Show the score button
-                    setTimeout(() => {
-                        if (guesses <= maxChances) {
-                            showAlert("You Won 🥳");
-                        } else {
-                            showAlert("You Lost 😅");
-                        }
-                    }, 1000);
+                    document.getElementById("showScoreButton").style.display = 'block';
+                    document.getElementById("retryButton").style.display = 'block';
                 }, 1000);
             } else {
                 showAlert("Please enter a valid number.");
             }
 
-            // Clear the input field
+            if (guesses >= maxChances && guess !== number) {
+                setTimeout(() => {
+                    showAlert(`You Lost! The Correct Number Was ${number}`);
+                    document.getElementById("retryButton").style.display = 'block';
+                }, 500);
+            }
+
             document.getElementById("numberInput").value = '';
             refocusInput();
         });
 
-        // Add event listener to the Show Score button
+        document.getElementById("retryButton").addEventListener("click", function () {
+            resetGame();
+        });
+
         document.getElementById("showScoreButton").addEventListener("click", function () {
             showAlert(`Your Score Is ${score}`);
         });
