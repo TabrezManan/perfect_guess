@@ -16,10 +16,9 @@
             flex-direction: column;
             font-family: Arial, sans-serif;
             background-color: #f0f0f0;
-            overflow: hidden; /* Prevent scrolling */
         }
 
-        /* Style the input fields */
+        /* Style the input field */
         #numberInput {
             font-size: 24px;
             padding: 10px;
@@ -50,19 +49,18 @@
             background-color: #45a049;
         }
 
-        /* Hide the buttons initially */
-        #button,
+        /* Hide the Show Score button initially */
         #showScoreButton {
             display: none;
         }
 
-        /* Style the custom alert and prompt boxes */
-        #customAlert,
-        #chancesOptions {
+        /* Style the custom alert box */
+        #customAlert {
             display: none;
             position: fixed;
+            top: 10%;
             left: 50%;
-            transform: translateX(-50%);
+            transform: translate(-50%, -50%);
             background-color: white;
             padding: 20px;
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
@@ -72,14 +70,12 @@
             width: 80%;
         }
 
-        #customAlert p,
-        #chancesOptions p {
+        #customAlert p {
             margin-bottom: 20px;
             font-size: 18px;
         }
 
-        #customAlert button,
-        #chancesOptions button {
+        #customAlert button {
             padding: 10px 20px;
             font-size: 18px;
             background-color: #4CAF50;
@@ -89,28 +85,11 @@
             cursor: pointer;
         }
 
-        #customAlert button:hover,
-        #chancesOptions button:hover {
+        #customAlert button:hover {
             background-color: #45a049;
         }
 
-        /* Style the chance selection pop-up */
-        #chancesOptions {
-            top: 0;
-            transform: translateY(0);
-            animation: slideDown 0.5s ease-in-out;
-        }
-
-        @keyframes slideDown {
-            from {
-                top: -100px; /* Hide it above the screen */
-            }
-            to {
-                top: 0; /* Slide into view */
-            }
-        }
-
-        /* Dim the background when alert or options are active */
+        /* Dim the background when alert is active */
         body.dimmed {
             background-color: rgba(0, 0, 0, 0.5);
         }
@@ -118,7 +97,7 @@
 </head>
 
 <body>
-    <input type="number" id="numberInput" placeholder="Guess The Number" disabled />
+    <input type="number" id="numberInput" placeholder="Guess The Number" />
     <button id="button">Click</button>
     <button id="showScoreButton">Show Score</button>
 
@@ -128,20 +107,18 @@
         <button onclick="closeAlert()">OK</button>
     </div>
 
-    <!-- Chance Selection Box -->
-    <div id="chancesOptions">
-        <p>Select the number of chances:</p>
-        <button onclick="startGame(5)">5 Chances</button>
-        <button onclick="startGame(10)">10 Chances</button>
-        <button onclick="startGame(15)">15 Chances</button>
-    </div>
-
     <script>
         // Generate a random number between 1 and 100
         let number = Math.floor((Math.random() * 100) + 1);
         let guesses = 0;
         let score = 0;
-        let maxChances = 0;
+
+        // Function to refocus the input field
+        function refocusInput() {
+            setTimeout(() => {
+                document.getElementById("numberInput").focus();
+            }, 200); // delay of 200ms
+        }
 
         // Function to show the custom alert
         function showAlert(message) {
@@ -154,24 +131,15 @@
         function closeAlert() {
             document.getElementById("customAlert").style.display = 'none';
             document.body.classList.remove('dimmed');  // Restore background
-            refocusInput();  // Refocus input field after closing alert
         }
 
-        // Function to start the game with a given number of chances
-        function startGame(chances) {
-            maxChances = chances;
-            document.getElementById("chancesOptions").style.display = 'none';
-            document.body.classList.remove('dimmed');
-            document.getElementById("button").style.display = 'block';  // Show the main button
-            document.getElementById("numberInput").disabled = false;  // Enable the input field
-            refocusInput();  // Auto-focus the input field
-        }
-
-        // Function to check the guess
-        function checkGuess() {
+        // Add event listener to the button
+        document.getElementById("button").addEventListener("click", function () {
+            // Get the guessed number from the input
             let guess = parseInt(document.getElementById("numberInput").value);
             guesses += 1;
 
+            // Check the guess
             if (guess > number) {
                 showAlert("Guess Lower!");
             } else if (guess < number) {
@@ -179,14 +147,16 @@
             } else if (guess === number) {
                 showAlert(`You Guessed The Number In ${guesses} Chances`);
                 setTimeout(() => {
-                    score = maxChances - guesses;
+                    score = 10 - guesses;
                     showAlert(`Your Score Is ${score}`);
                     document.getElementById("showScoreButton").style.display = 'block'; // Show the score button
                     setTimeout(() => {
-                        if (guesses <= maxChances) {
+                        if (guesses < 10) {
                             showAlert("You Won 🥳");
-                        } else {
+                        } else if (guesses > 10) {
                             showAlert("You Lost 😅");
+                        } else {
+                            showAlert("It's A Draw 🙂");
                         }
                     }, 1000);
                 }, 1000);
@@ -196,26 +166,13 @@
 
             // Clear the input field
             document.getElementById("numberInput").value = '';
-        }
+            refocusInput();
+        });
 
-        // Function to refocus the input field
-        function refocusInput() {
-            setTimeout(() => {
-                document.getElementById("numberInput").focus();
-            }, 200); // delay of 200ms
-        }
-
-        // Event listener for the main game button
-        document.getElementById("button").addEventListener("click", checkGuess);
-
-        // Event listener for the Show Score button
+        // Add event listener to the Show Score button
         document.getElementById("showScoreButton").addEventListener("click", function () {
             showAlert(`Your Score Is ${score}`);
         });
-
-        // Show the chances options on page load
-        document.getElementById("chancesOptions").style.display = 'block';
-        document.body.classList.add('dimmed');  // Dim the background while asking for chances
     </script>
 </body>
 
