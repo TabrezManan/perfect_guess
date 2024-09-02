@@ -1,3 +1,6 @@
+/body>
+
+</html>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -93,6 +96,41 @@
         body.dimmed {
             background-color: rgba(0, 0, 0, 0.5);
         }
+
+        /* Style the chance selection box */
+        #chanceSelection {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            z-index: 1000;
+            transition: top 0.5s ease;
+        }
+
+        #chanceSelection p {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        #chanceSelection button {
+            font-size: 18px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 10px;
+        }
+
+        #chanceSelection button:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 
@@ -107,11 +145,20 @@
         <button onclick="closeAlert()">OK</button>
     </div>
 
+    <!-- Chance Selection Box -->
+    <div id="chanceSelection">
+        <p>Select Number of Chances:</p>
+        <button onclick="setChances(5)">5</button>
+        <button onclick="setChances(10)">10</button>
+        <button onclick="setChances(15)">15</button>
+    </div>
+
     <script>
         // Generate a random number between 1 and 100
         let number = Math.floor((Math.random() * 100) + 1);
         let guesses = 0;
         let score = 0;
+        let maxChances = 10;  // Default to 10 chances if none is selected
 
         // Function to refocus the input field
         function refocusInput() {
@@ -133,6 +180,24 @@
             document.body.classList.remove('dimmed');  // Restore background
         }
 
+        // Function to show the chance selection box
+        function showChanceSelection() {
+            document.getElementById("chanceSelection").style.display = 'block';
+            document.getElementById("chanceSelection").style.top = '0';
+        }
+
+        // Function to set the number of chances
+        function setChances(chances) {
+            maxChances = chances;
+            document.getElementById("chanceSelection").style.top = '-100%'; // Slide up and hide
+            refocusInput();
+        }
+
+        // Show the chance selection on page load
+        window.onload = function () {
+            showChanceSelection();
+        };
+
         // Add event listener to the button
         document.getElementById("button").addEventListener("click", function () {
             // Get the guessed number from the input
@@ -147,16 +212,14 @@
             } else if (guess === number) {
                 showAlert(`You Guessed The Number In ${guesses} Chances`);
                 setTimeout(() => {
-                    score = 10 - guesses;
+                    score = maxChances - guesses;
                     showAlert(`Your Score Is ${score}`);
                     document.getElementById("showScoreButton").style.display = 'block'; // Show the score button
                     setTimeout(() => {
-                        if (guesses < 10) {
+                        if (guesses <= maxChances) {
                             showAlert("You Won 🥳");
-                        } else if (guesses > 10) {
-                            showAlert("You Lost 😅");
                         } else {
-                            showAlert("It's A Draw 🙂");
+                            showAlert("You Lost 😅");
                         }
                     }, 1000);
                 }, 1000);
