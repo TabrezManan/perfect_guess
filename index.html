@@ -28,12 +28,21 @@
             text-align: center;
             border-radius: 10px;
             border: 2px solid #ccc;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: box-shadow 0.3s ease-in-out;
+        }
+
+        #numberInput:focus,
+        #chancesInput:focus {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            border-color: #4CAF50;
         }
 
         /* Style the buttons */
         #button,
         #setChancesButton,
-        #showScoreButton {
+        #showScoreButton,
+        #retryButton {
             font-size: 24px;
             padding: 15px 30px;
             background-color: #4CAF50;
@@ -43,19 +52,24 @@
             cursor: pointer;
             width: 300px;
             margin-top: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s ease-in-out, box-shadow 0.3s ease-in-out;
         }
 
-        /* Add a hover effect */
         #button:hover,
         #setChancesButton:hover,
-        #showScoreButton:hover {
+        #showScoreButton:hover,
+        #retryButton:hover {
             background-color: #45a049;
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
         }
 
-        /* Hide the number input and Show Score button initially */
+        /* Hide the number input, retry button, and Show Score button initially */
         #numberInput,
         #button,
-        #showScoreButton {
+        #showScoreButton,
+        #retryButton {
             display: none;
         }
 
@@ -63,16 +77,18 @@
         #customAlert {
             display: none;
             position: fixed;
-            top: 10%;
+            top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             background-color: white;
             padding: 20px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
             border-radius: 10px;
             z-index: 1000;
             text-align: center;
             width: 80%;
+            max-width: 400px;
+            animation: popUp 0.3s ease-in-out;
         }
 
         #customAlert p {
@@ -88,6 +104,7 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
         }
 
         #customAlert button:hover {
@@ -97,6 +114,18 @@
         /* Dim the background when alert is active */
         body.dimmed {
             background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        /* Animation for pop-up */
+        @keyframes popUp {
+            0% {
+                transform: translate(-50%, -50%) scale(0.5);
+                opacity: 0;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
         }
     </style>
 </head>
@@ -108,6 +137,7 @@
     <input type="number" id="numberInput" placeholder="Guess The Number" />
     <button id="button">Click</button>
     <button id="showScoreButton">Show Score</button>
+    <button id="retryButton">Retry</button>
 
     <!-- Custom Alert Box -->
     <div id="customAlert">
@@ -116,7 +146,6 @@
     </div>
 
     <script>
-        // Generate a random number between 1 and 100
         let number = Math.floor((Math.random() * 100) + 1);
         let guesses = 0;
         let score = 0;
@@ -142,6 +171,21 @@
             document.body.classList.remove('dimmed');  // Restore background
         }
 
+        // Reset game function
+        function resetGame() {
+            number = Math.floor((Math.random() * 100) + 1);
+            guesses = 0;
+            score = 0;
+            document.getElementById("numberInput").style.display = 'none';
+            document.getElementById("button").style.display = 'none';
+            document.getElementById("showScoreButton").style.display = 'none';
+            document.getElementById("retryButton").style.display = 'none';
+            document.getElementById("chancesInput").style.display = 'block';
+            document.getElementById("setChancesButton").style.display = 'block';
+            document.getElementById("chancesInput").value = '';
+            refocusInput("chancesInput");
+        }
+
         // Add event listener to the Set Chances button
         document.getElementById("setChancesButton").addEventListener("click", function () {
             maxChances = parseInt(document.getElementById("chancesInput").value);
@@ -159,11 +203,9 @@
 
         // Add event listener to the Guess button
         document.getElementById("button").addEventListener("click", function () {
-            // Get the guessed number from the input
             let guess = parseInt(document.getElementById("numberInput").value);
             guesses += 1;
 
-            // Check the guess
             if (guess > number) {
                 showAlert("Guess Lower!");
             } else if (guess < number) {
@@ -178,6 +220,7 @@
                     } else {
                         showAlert("You Lost 😅");
                     }
+                    document.getElementById("retryButton").style.display = 'block'; // Show the retry button
                 }, 1000);
             } else {
                 showAlert("Please enter a valid number.");
@@ -185,22 +228,22 @@
 
             // Check if chances are exhausted
             if (guesses >= maxChances && guess !== number) {
-                showAlert("No more chances left! You lost.");
+                showAlert("You Lost 😅");
+                document.getElementById("retryButton").style.display = 'block'; // Show the retry button
                 setTimeout(() => {
                     showAlert("The correct number was " + number);
                 }, 1000);
             }
 
-            // Clear the input field
             document.getElementById("numberInput").value = '';
             refocusInput("numberInput");
         });
 
-        // Add event listener to the Show Score button
-        document.getElementById("showScoreButton").addEventListener("click", function () {
-            showAlert(`Your Score Is ${score}`);
+        // Add event listener to the Retry button
+        document.getElementById("retryButton").addEventListener("click", function () {
+            resetGame();
         });
-    </script>
-</body>
 
-</html>
+        // Add event listener to the Show Score button
+        document.getElementById("showScoreButton").addEventListener("
+        
