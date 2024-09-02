@@ -7,12 +7,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Perfect Guess</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-
         /* Hide the body content initially */
         #mainContent {
             display: none;
@@ -20,6 +14,7 @@
             align-items: center;
             height: 100vh;
             flex-direction: column;
+            font-family: Arial, sans-serif;
             background-color: #f0f0f0;
         }
 
@@ -36,10 +31,8 @@
 
         /* Style the buttons */
         #button,
-        #showScoreButton,
         #retryButton,
-        #showLeaderboardButton,
-        #hintButton {
+        #showScoreButton {
             font-size: 24px;
             padding: 15px 30px;
             background-color: #4CAF50;
@@ -53,22 +46,14 @@
 
         /* Add a hover effect */
         #button:hover,
-        #showScoreButton:hover,
         #retryButton:hover,
-        #showLeaderboardButton:hover,
-        #hintButton:hover {
+        #showScoreButton:hover {
             background-color: #45a049;
         }
 
         /* Hide the Show Score and Retry buttons initially */
         #showScoreButton,
-        #retryButton,
-        #showLeaderboardButton {
-            display: none;
-        }
-
-        /* Hide the Show Score button initially */
-        #showScoreButton {
+        #retryButton {
             display: none;
         }
 
@@ -115,15 +100,15 @@
         /* Style the chance selection box */
         #chanceSelection {
             position: fixed;
-            top: 20%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            top: -100%;
+            left: 0;
+            right: 0;
             background-color: white;
             padding: 20px;
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
             text-align: center;
             z-index: 1000;
-            border-radius: 10px;
+            transition: top 0.5s ease;
         }
 
         #chanceSelection p {
@@ -145,41 +130,6 @@
         #chanceSelection button:hover {
             background-color: #45a049;
         }
-
-        /* Style the leaderboard box */
-        #leaderboard {
-            display: none;
-            position: fixed;
-            top: 20%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: white;
-            padding: 20px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
-            z-index: 1000;
-            text-align: center;
-            width: 80%;
-        }
-
-        #leaderboard p {
-            font-size: 20px;
-            margin-bottom: 20px;
-        }
-
-        #leaderboard button {
-            font-size: 18px;
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        #leaderboard button:hover {
-            background-color: #45a049;
-        }
     </style>
 </head>
 
@@ -194,35 +144,23 @@
 
     <!-- Main Game Content -->
     <div id="mainContent">
-        <p id="playerTurn">Player 1's Turn</p>
         <input type="number" id="numberInput" placeholder="Guess The Number" />
         <button id="button">Click</button>
-        <button id="hintButton">Hint</button>
         <button id="retryButton">Retry</button>
         <button id="showScoreButton">Show Score</button>
-        <button id="showLeaderboardButton">Show Leaderboard</button>
 
         <!-- Custom Alert Box -->
         <div id="customAlert">
             <p id="alertText"></p>
             <button onclick="closeAlert()">OK</button>
         </div>
-
-        <!-- Leaderboard Box -->
-        <div id="leaderboard">
-            <p id="leaderboardText"></p>
-            <button onclick="closeLeaderboard()">Close</button>
-        </div>
     </div>
 
     <script>
         let number = Math.floor((Math.random() * 100) + 1);
         let guesses = 0;
-        let scores = { player1: 0, player2: 0 };
+        let score = 0;
         let maxChances = 10; // Default to 10 chances if none is selected
-        let currentPlayer = 'player1';
-        let hintsUsed = 0;
-        const maxHints = 3;
 
         function refocusInput() {
             setTimeout(() => {
@@ -241,47 +179,13 @@
             document.body.classList.remove('dimmed');
         }
 
-        function showLeaderboard() {
-            const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
-            let leaderboardText = '<p>Leaderboard:</p>';
-            leaderboard.forEach((entry, index) => {
-                leaderboardText += `<p>${index + 1}. ${entry.name}: ${entry.score}</p>`;
-            });
-            document.getElementById("leaderboardText").innerHTML = leaderboardText;
-            document.getElementById("leaderboard").style.display = 'block';
-            document.body.classList.add('dimmed');
-        }
-
-        function closeLeaderboard() {
-            document.getElementById("leaderboard").style.display = 'none';
-            document.body.classList.remove('dimmed');
-        }
-
-        function saveScore(name, score) {
-            let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
-            leaderboard.push({ name, score });
-            leaderboard.sort((a, b) => b.score - a.score);
-            leaderboard = leaderboard.slice(0, 10); // Keep top 10 scores
-            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
-        }
-
-        function giveHint() {
-            if (hintsUsed >= maxHints) {
-                showAlert("No more hints available.");
-                return;
-            }
-            let hint = number <= 50 ? "The number is less than or equal to 50." : "The number is greater than 50.";
-            hintsUsed += 1;
-            showAlert(hint);
-        }
-
         function showChanceSelection() {
             document.getElementById("chanceSelection").style.top = '20%';
         }
 
         function setChances(chances) {
             maxChances = chances;
-            document.getElementById("chanceSelection").style.display = 'none';
+            document.getElementById("chanceSelection").style.top = '-100%';
             setTimeout(() => {
                 document.getElementById("mainContent").style.display = 'flex';
                 refocusInput();
@@ -291,10 +195,10 @@
         function resetGame() {
             number = Math.floor((Math.random() * 100) + 1);
             guesses = 0;
-            hintsUsed = 0;
+            score = 0;
             document.getElementById("numberInput").value = '';
-            document.getElementById("showScoreButton").style.display = 'none';
             document.getElementById("retryButton").style.display = 'none';
+            document.getElementById("showScoreButton").style.display = 'none';
             refocusInput();
         }
 
@@ -308,29 +212,25 @@
 
             if (guess > number) {
                 showAlert("Guess Lower!");
-                document.body.style.backgroundColor = '#ffcccc'; // Visual feedback
             } else if (guess < number) {
                 showAlert("Guess Higher!");
-                document.body.style.backgroundColor = '#ccffcc'; // Visual feedback
             } else if (guess === number) {
+                score = maxChances - guesses;
                 showAlert(`You Guessed The Number In ${guesses} Chances`);
                 setTimeout(() => {
-                    let score = maxChances - guesses;
-                    scores[currentPlayer] = score;
-                    saveScore(currentPlayer, score);
+                    showAlert(`Your Score Is ${score}`);
                     document.getElementById("showScoreButton").style.display = 'block';
                     document.getElementById("retryButton").style.display = 'block';
-                    document.getElementById("showLeaderboardButton").style.display = 'block';
-                    setTimeout(() => {
-                        if (guesses <= maxChances) {
-                            showAlert("You Won 🥳");
-                        } else {
-                            showAlert("You Lost 😅");
-                        }
-                    }, 1000);
                 }, 1000);
             } else {
                 showAlert("Please enter a valid number.");
+            }
+
+            if (guesses >= maxChances && guess !== number) {
+                setTimeout(() => {
+                    showAlert(`You Lost! The Correct Number Was ${number}`);
+                    document.getElementById("retryButton").style.display = 'block';
+                }, 500);
             }
 
             document.getElementById("numberInput").value = '';
@@ -342,15 +242,7 @@
         });
 
         document.getElementById("showScoreButton").addEventListener("click", function () {
-            showAlert(`Your Score Is ${scores[currentPlayer]}`);
-        });
-
-        document.getElementById("showLeaderboardButton").addEventListener("click", function () {
-            showLeaderboard();
-        });
-
-        document.getElementById("hintButton").addEventListener("click", function () {
-            giveHint();
+            showAlert(`Your Score Is ${score}`);
         });
     </script>
 </body>
