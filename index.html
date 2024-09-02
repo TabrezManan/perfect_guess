@@ -7,17 +7,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Perfect Guess</title>
     <style>
-        /* Existing styles... */
-        /* Add styles for turn indicators and hints */
-        #playerTurn {
-            font-size: 24px;
-            margin-bottom: 20px;
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
         }
 
+        /* Hide the body content initially */
+        #mainContent {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            background-color: #f0f0f0;
+        }
+
+        /* Style the input field */
+        #numberInput {
+            font-size: 24px;
+            padding: 10px;
+            margin-bottom: 20px;
+            width: 300px;
+            text-align: center;
+            border-radius: 10px;
+            border: 2px solid #ccc;
+        }
+
+        /* Style the buttons */
+        #button,
+        #showScoreButton,
+        #retryButton,
+        #showLeaderboardButton,
         #hintButton {
             font-size: 24px;
             padding: 15px 30px;
-            background-color: #2196F3;
+            background-color: #4CAF50;
             color: white;
             border: none;
             border-radius: 10px;
@@ -26,10 +51,102 @@
             margin-top: 20px;
         }
 
+        /* Add a hover effect */
+        #button:hover,
+        #showScoreButton:hover,
+        #retryButton:hover,
+        #showLeaderboardButton:hover,
         #hintButton:hover {
-            background-color: #0b7dda;
+            background-color: #45a049;
         }
 
+        /* Hide the Show Score and Retry buttons initially */
+        #showScoreButton,
+        #retryButton,
+        #showLeaderboardButton {
+            display: none;
+        }
+
+        /* Hide the Show Score button initially */
+        #showScoreButton {
+            display: none;
+        }
+
+        /* Style the custom alert box */
+        #customAlert {
+            display: none;
+            position: fixed;
+            top: 10%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            z-index: 1000;
+            text-align: center;
+            width: 80%;
+        }
+
+        #customAlert p {
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        #customAlert button {
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #customAlert button:hover {
+            background-color: #45a049;
+        }
+
+        /* Dim the background when alert is active */
+        body.dimmed {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        /* Style the chance selection box */
+        #chanceSelection {
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            z-index: 1000;
+            border-radius: 10px;
+        }
+
+        #chanceSelection p {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        #chanceSelection button {
+            font-size: 18px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 10px;
+        }
+
+        #chanceSelection button:hover {
+            background-color: #45a049;
+        }
+
+        /* Style the leaderboard box */
         #leaderboard {
             display: none;
             position: fixed;
@@ -101,7 +218,7 @@
     <script>
         let number = Math.floor((Math.random() * 100) + 1);
         let guesses = 0;
-        let score = { player1: 0, player2: 0 };
+        let scores = { player1: 0, player2: 0 };
         let maxChances = 10; // Default to 10 chances if none is selected
         let currentPlayer = 'player1';
         let hintsUsed = 0;
@@ -153,12 +270,7 @@
                 showAlert("No more hints available.");
                 return;
             }
-            let hint;
-            if (number <= 50) {
-                hint = "The number is less than or equal to 50.";
-            } else {
-                hint = "The number is greater than 50.";
-            }
+            let hint = number <= 50 ? "The number is less than or equal to 50." : "The number is greater than 50.";
             hintsUsed += 1;
             showAlert(hint);
         }
@@ -169,7 +281,7 @@
 
         function setChances(chances) {
             maxChances = chances;
-            document.getElementById("chanceSelection").style.top = '-100%';
+            document.getElementById("chanceSelection").style.display = 'none';
             setTimeout(() => {
                 document.getElementById("mainContent").style.display = 'flex';
                 refocusInput();
@@ -179,21 +291,11 @@
         function resetGame() {
             number = Math.floor((Math.random() * 100) + 1);
             guesses = 0;
-            score = { player1: 0, player2: 0 };
             hintsUsed = 0;
             document.getElementById("numberInput").value = '';
-            document.getElementById("retryButton").style.display = 'none';
             document.getElementById("showScoreButton").style.display = 'none';
-            document.getElementById("showLeaderboardButton").style.display = 'none';
-            document.getElementById("playerTurn").innerText = "Player 1's Turn";
-            currentPlayer = 'player1';
-            document.body.style.backgroundColor = '#f0f0f0'; // Reset background color
+            document.getElementById("retryButton").style.display = 'none';
             refocusInput();
-        }
-
-        function switchPlayer() {
-            currentPlayer = currentPlayer === 'player1' ? 'player2' : 'player1';
-            document.getElementById("playerTurn").innerText = `${currentPlayer === 'player1' ? "Player 1's" : "Player 2's"} Turn`;
         }
 
         window.onload = function () {
@@ -203,39 +305,36 @@
         document.getElementById("button").addEventListener("click", function () {
             let guess = parseInt(document.getElementById("numberInput").value);
             guesses += 1;
-            score[currentPlayer] += 1;
 
             if (guess > number) {
-                document.body.style.backgroundColor = '#FFDDDD'; // Red for too high
                 showAlert("Guess Lower!");
+                document.body.style.backgroundColor = '#ffcccc'; // Visual feedback
             } else if (guess < number) {
-                document.body.style.backgroundColor = '#DDFFDD'; // Green for too low
                 showAlert("Guess Higher!");
+                document.body.style.backgroundColor = '#ccffcc'; // Visual feedback
             } else if (guess === number) {
-                document.body.style.backgroundColor = '#DDFFDD'; // Green for correct
-                showAlert(`${currentPlayer === 'player1' ? "Player 1" : "Player 2"} Guessed The Number In ${score[currentPlayer]} Chances`);
+                showAlert(`You Guessed The Number In ${guesses} Chances`);
                 setTimeout(() => {
-                    showAlert(`The Correct Number Was ${number}`);
+                    let score = maxChances - guesses;
+                    scores[currentPlayer] = score;
+                    saveScore(currentPlayer, score);
                     document.getElementById("showScoreButton").style.display = 'block';
                     document.getElementById("retryButton").style.display = 'block';
                     document.getElementById("showLeaderboardButton").style.display = 'block';
-                    saveScore(prompt('Enter your name:'), score[currentPlayer]);
+                    setTimeout(() => {
+                        if (guesses <= maxChances) {
+                            showAlert("You Won 🥳");
+                        } else {
+                            showAlert("You Lost 😅");
+                        }
+                    }, 1000);
                 }, 1000);
             } else {
                 showAlert("Please enter a valid number.");
             }
 
-            if (guesses >= maxChances) {
-                setTimeout(() => {
-                    showAlert(`${currentPlayer === 'player1' ? "Player 1" : "Player 2"} Lost! The Correct Number Was ${number}`);
-                    document.getElementById("retryButton").style.display = 'block';
-                    document.getElementById("showLeaderboardButton").style.display = 'block';
-                }, 500);
-            }
-
             document.getElementById("numberInput").value = '';
             refocusInput();
-            switchPlayer();
         });
 
         document.getElementById("retryButton").addEventListener("click", function () {
@@ -243,7 +342,7 @@
         });
 
         document.getElementById("showScoreButton").addEventListener("click", function () {
-            showAlert(`Player 1 Score: ${score.player1}, Player 2 Score: ${score.player2}`);
+            showAlert(`Your Score Is ${scores[currentPlayer]}`);
         });
 
         document.getElementById("showLeaderboardButton").addEventListener("click", function () {
