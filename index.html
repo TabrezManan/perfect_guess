@@ -134,11 +134,11 @@
             background-color: #45a049;
         }
 
-        /* Style the leaderboard */
+        /* Style for leaderboard */
         #leaderboard {
             display: none;
             position: fixed;
-            top: 50%;
+            top: 10%;
             left: 50%;
             transform: translate(-50%, -50%);
             background-color: white;
@@ -148,20 +148,27 @@
             z-index: 1000;
             text-align: center;
             width: 80%;
+            overflow-y: auto;
         }
 
-        #leaderboard h2 {
-            margin-bottom: 20px;
+        #leaderboard table {
+            width: 100%;
+            border-collapse: collapse;
         }
 
-        #leaderboard ul {
-            list-style-type: none;
-            padding: 0;
+        #leaderboard th,
+        #leaderboard td {
+            border: 1px solid #ddd;
+            padding: 10px;
         }
 
-        #leaderboard ul li {
-            font-size: 18px;
-            margin: 5px 0;
+        #leaderboard th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        #leaderboard tr:nth-child(even) {
+            background-color: #f2f2f2;
         }
 
         #leaderboard button {
@@ -184,9 +191,9 @@
     <!-- Chance Selection Box -->
     <div id="chanceSelection">
         <p>Select Difficulty Level:</p>
-        <button onclick="setChances(5, 'Hard')">Hard</button>
-        <button onclick="setChances(7, 'Medium')">Medium</button>
-        <button onclick="setChances(10, 'Easy')">Easy</button>
+        <button onclick="setDifficulty('Easy')">Easy</button>
+        <button onclick="setDifficulty('Medium')">Medium</button>
+        <button onclick="setDifficulty('Hard')">Hard</button>
     </div>
 
     <!-- Main Game Content -->
@@ -202,13 +209,25 @@
             <p id="alertText"></p>
             <button onclick="closeAlert()">OK</button>
         </div>
+    </div>
 
-        <!-- Leaderboard -->
-        <div id="leaderboard">
-            <h2>Leaderboard</h2>
-            <ul id="leaderboardList"></ul>
-            <button onclick="closeLeaderboard()">Close</button>
-        </div>
+    <!-- Leaderboard Box -->
+    <div id="leaderboard">
+        <h2>Leaderboard</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Name</th>
+                    <th>Score</th>
+                    <th>Guesses</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboardList">
+                <!-- Leaderboard entries will go here -->
+            </tbody>
+        </table>
+        <button onclick="closeLeaderboard()">Close</button>
     </div>
 
     <script>
@@ -236,36 +255,10 @@
             document.body.classList.remove('dimmed');
         }
 
-        function showChanceSelection() {
-            document.getElementById("chanceSelection").style.top = '20%';
-        }
-
-        function setChances(chances, diff) {
-            maxChances = chances;
-            difficulty = diff;
-            document.getElementById("chanceSelection").style.top = '-100%';
-            setTimeout(() => {
-                document.getElementById("mainContent").style.display = 'flex';
-                refocusInput();
-            }, 500);
-        }
-
-        function resetGame() {
-            number = Math.floor((Math.random() * 100) + 1);
-            guesses = 0;
-            score = 0;
-            document.getElementById("numberInput").value = '';
-            document.getElementById("retryButton").style.display = 'none';
-            document.getElementById("showScoreButton").style.display = 'none';
-            document.getElementById("leaderboardButton").style.display = 'none';
-            document.body.style.backgroundColor = '#f0f0f0'; // Reset background color
-            refocusInput();
-        }
-
         function updateBackgroundColor(guess) {
-            const difference = Math.abs(guess - number);
+            const difference = Math.abs(number - guess);
             if (difference < 7) {
-                document.body.style.backgroundColor = 'rgba(0,0,0)'; // Very Light Brown
+                document.body.style.backgroundColor = 'rgba(0, 0, 0, 0.1)'; // Very Light Black
             } else if (difference < 15) {
                 document.body.style.backgroundColor = 'rgba(0, 255, 0, 0.1)'; // Very Light Green
             } else if (difference < 30) {
@@ -291,15 +284,49 @@
             const leaderboardList = document.getElementById("leaderboardList");
             leaderboardList.innerHTML = '';
             leaderboard.forEach((entry, index) => {
-                const li = document.createElement('li');
-                li.textContent = `${index + 1}. ${entry.name} - Score: ${entry.score}, Guesses: ${entry.guesses}`;
-                leaderboardList.appendChild(li);
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${entry.name}</td>
+                    <td>${entry.score}</td>
+                    <td>${entry.guesses}</td>
+                `;
+                leaderboardList.appendChild(row);
             });
             document.getElementById("leaderboard").style.display = 'block';
+            document.body.classList.add('dimmed');
         }
 
         function closeLeaderboard() {
             document.getElementById("leaderboard").style.display = 'none';
+            document.body.classList.remove('dimmed');
+        }
+
+        function showChanceSelection() {
+            document.getElementById("chanceSelection").style.top = '20%';
+        }
+
+        function setDifficulty(level) {
+            if (level === 'Easy') maxChances = 10;
+            if (level === 'Medium') maxChances = 7;
+            if (level === 'Hard') maxChances = 5;
+            difficulty = level;
+            document.getElementById("chanceSelection").style.top = '-100%';
+            setTimeout(() => {
+                document.getElementById("mainContent").style.display = 'flex';
+                refocusInput();
+            }, 500);
+        }
+
+        function resetGame() {
+            number = Math.floor((Math.random() * 100) + 1);
+            guesses = 0;
+            score = 0;
+            document.getElementById("numberInput").value = '';
+            document.getElementById("retryButton").style.display = 'none';
+            document.getElementById("showScoreButton").style.display = 'none';
+            document.getElementById("leaderboardButton").style.display = 'none';
+            refocusInput();
         }
 
         window.onload = function () {
@@ -310,6 +337,11 @@
             let guess = parseInt(document.getElementById("numberInput").value);
             guesses += 1;
 
+            if (isNaN(guess)) {
+                showAlert("Please enter a valid number.");
+                return;
+            }
+
             updateBackgroundColor(guess);
 
             if (guess > number) {
@@ -317,30 +349,19 @@
             } else if (guess < number) {
                 showAlert("Guess Higher!");
             } else if (guess === number) {
-                if (difficulty === 'Easy') {
-                    score = 10 - (guesses - 1);
-                } else if (difficulty === 'Medium') {
-                    score = 7 - (guesses - 1);
-                } else if (difficulty === 'Hard') {
-                    score = 5 - (guesses - 1);
-                }
+                score = Math.max(0, maxChances - guesses); // Score is out of 10
                 showAlert(`You Guessed The Number In ${guesses} Chances`);
                 setTimeout(() => {
-                    showAlert(`Your Score Is ${score}`);
-                    updateLeaderboard(score, guesses);
+                    showAlert(`Your Score Is ${score} out of 10`);
                     document.getElementById("showScoreButton").style.display = 'block';
                     document.getElementById("retryButton").style.display = 'block';
                     document.getElementById("leaderboardButton").style.display = 'block';
+                    updateLeaderboard(score, guesses);
                 }, 1000);
-            } else {
-                showAlert("Please enter a valid number.");
-            }
-
-            if (guesses >= maxChances && guess !== number) {
+            } else if (guesses >= maxChances) {
                 setTimeout(() => {
                     showAlert(`You Lost! The Correct Number Was ${number}`);
                     document.getElementById("retryButton").style.display = 'block';
-                    document.getElementById("leaderboardButton").style.display = 'block';
                 }, 500);
             }
 
@@ -353,7 +374,7 @@
         });
 
         document.getElementById("showScoreButton").addEventListener("click", function () {
-            showAlert(`Your Score Is ${score}`);
+            showAlert(`Your Score Is ${score} out of 10`);
         });
 
         document.getElementById("leaderboardButton").addEventListener("click", function () {
