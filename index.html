@@ -159,6 +159,7 @@
         #leaderboard table {
             width: 100%;
             border-collapse: collapse;
+            font-size: 18px;
         }
 
         #leaderboard th,
@@ -175,6 +176,10 @@
 
         #leaderboard tr:nth-child(even) {
             background-color: #f2f2f2;
+        }
+
+        #leaderboard tr:hover {
+            background-color: #ddd;
         }
 
         #leaderboard button {
@@ -196,41 +201,37 @@
         #namePrompt {
             display: none;
             position: fixed;
-            top: 10%;
+            top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             background-color: white;
             padding: 20px;
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
             border-radius: 10px;
-            z-index: 1000;
+            z-index: 1001;
             text-align: center;
-            width: 80%;
-        }
-
-        #namePrompt p {
-            margin-bottom: 20px;
-            font-size: 18px;
+            width: 300px;
         }
 
         #namePrompt input {
             font-size: 18px;
             padding: 10px;
-            width: 80%;
             margin-bottom: 20px;
-            border-radius: 5px;
-            border: 2px solid #ccc;
+            width: 100%;
             text-align: center;
+            border-radius: 10px;
+            border: 2px solid #ccc;
         }
 
         #namePrompt button {
-            padding: 10px 20px;
             font-size: 18px;
+            padding: 10px 20px;
             background-color: #4CAF50;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            width: 100%;
         }
 
         #namePrompt button:hover {
@@ -282,9 +283,9 @@
         <button onclick="closeLeaderboard()">Close</button>
     </div>
 
-    <!-- Name Prompt Box -->
+    <!-- Custom Name Prompt -->
     <div id="namePrompt">
-        <p>Please Enter Your Name:</p>
+        <p>Enter your name for the leaderboard:</p>
         <input type="text" id="nameInput" placeholder="Your Name" />
         <button onclick="submitName()">Submit</button>
     </div>
@@ -316,7 +317,21 @@
         }
 
         function showLeaderboard() {
-            updateLeaderboardTable();
+            let leaderboardList = document.getElementById("leaderboardList");
+            leaderboardList.innerHTML = '';
+            leaderboard.sort((a, b) => b.score - a.score);
+
+            leaderboard.forEach((entry, index) => {
+                let row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${entry.name}</td>
+                    <td>${entry.score}</td>
+                    <td>${entry.guesses}</td>
+                `;
+                leaderboardList.appendChild(row);
+            });
+
             document.getElementById("leaderboard").style.display = 'block';
             document.body.classList.add('dimmed');
         }
@@ -326,93 +341,20 @@
             document.body.classList.remove('dimmed');
         }
 
-        function updateLeaderboardTable() {
-            const leaderboardList = document.getElementById("leaderboardList");
-            leaderboardList.innerHTML = ''; // Clear existing leaderboard entries
-            leaderboard
-                .sort((a, b) => b.score - a.score)
-                .slice(0, 10) // Show top 10
-                .forEach((entry, index) => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${entry.name}</td>
-                    <td>${entry.score}</td>
-                    <td>${entry.guesses}</td>
-                `;
-                    leaderboardList.appendChild(row);
-                });
-        }
-
-        function setDifficulty(selectedDifficulty) {
-            difficulty = selectedDifficulty;
-            switch (difficulty) {
-                case 'Easy':
-                    maxChances = 10;
-                    break;
-                case 'Medium':
-                    maxChances = 7;
-                    break;
-                case 'Hard':
-                    maxChances = 5;
-                    break;
-            }
-            document.getElementById('chanceSelection').style.top = '-100%';
-            document.getElementById('mainContent').style.display = 'flex';
-            refocusInput();
-        }
-
-        function setBackgroundColor(guessedNumber) {
-            const difference = Math.abs(guessedNumber - number);
-            if (difference === 0) {
-                document.body.style.backgroundColor = '#4CAF50'; // Correct guess: Green
-            } else if (difference <= 10) {
-                document.body.style.backgroundColor = '#FFD700'; // Close guess: Yellow
-            } else if (difference <= 20) {
-                document.body.style.backgroundColor = '#FFA500'; // Further away: Orange
-            } else {
-                document.body.style.backgroundColor = '#FF6347'; // Far away: Red
-            }
-        }
-
-        document.getElementById("button").onclick = function () {
-            const guessedNumber = Number(document.getElementById("numberInput").value);
-            guesses++;
-            setBackgroundColor(guessedNumber);
-
-            if (guessedNumber === number) {
-                score = Math.floor(((maxChances - guesses + 1) / maxChances) * 100);
-                showAlert(`Congratulations! You guessed the correct number ${number} in ${guesses} guesses. Your score is ${score}.`);
-                document.getElementById("showScoreButton").style.display = 'block';
-                document.getElementById("retryButton").style.display = 'block';
-                document.getElementById("leaderboardButton").style.display = 'block';
-                document.getElementById("button").disabled = true;
-                document.getElementById("numberInput").disabled = true;
-                showNamePrompt();
-            } else if (guesses === maxChances) {
-                showAlert(`Game Over! You've used all ${maxChances} chances. The correct number was ${number}.`);
-                document.getElementById("retryButton").style.display = 'block';
-                document.getElementById("leaderboardButton").style.display = 'block';
-                document.getElementById("button").disabled = true;
-                document.getElementById("numberInput").disabled = true;
-            } else {
-                let hint = guessedNumber > number ? "Too High!" : "Too Low!";
-                showAlert(`Wrong guess! ${hint} You have ${maxChances - guesses} chances left.`);
-            }
-        };
-
         function showNamePrompt() {
             document.getElementById("namePrompt").style.display = 'block';
             document.body.classList.add('dimmed');
-            refocusInput();
         }
 
         function submitName() {
-            const playerName = document.getElementById("nameInput").value.trim();
-            if (playerName) {
-                leaderboard.push({ name: playerName, score: score, guesses: guesses });
+            let nameInput = document.getElementById("nameInput").value;
+            if (nameInput) {
+                leaderboard.push({ name: nameInput, score: score, guesses: guesses });
                 localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
                 closeNamePrompt();
+                showLeaderboard();
+            } else {
+                showAlert('Please enter a valid name.');
             }
         }
 
@@ -421,23 +363,59 @@
             document.body.classList.remove('dimmed');
         }
 
-        document.getElementById("retryButton").onclick = function () {
+        function setDifficulty(level) {
+            switch (level) {
+                case 'Easy':
+                    maxChances = 15;
+                    break;
+                case 'Medium':
+                    maxChances = 10;
+                    break;
+                case 'Hard':
+                    maxChances = 5;
+                    break;
+            }
+            document.getElementById("chanceSelection").style.top = '-100%';
+            startGame();
+        }
+
+        function startGame() {
             number = Math.floor((Math.random() * 100) + 1);
             guesses = 0;
             score = 0;
+            document.getElementById("mainContent").style.display = 'flex';
+            document.getElementById("chanceSelection").style.top = '-100%';
             document.getElementById("numberInput").value = '';
-            document.getElementById("button").disabled = false;
-            document.getElementById("numberInput").disabled = false;
+            document.getElementById("button").style.display = 'block';
             document.getElementById("retryButton").style.display = 'none';
             document.getElementById("showScoreButton").style.display = 'none';
             document.getElementById("leaderboardButton").style.display = 'none';
-            document.body.style.backgroundColor = '#f0f0f0'; // Reset background color
-            refocusInput();
-        };
+        }
 
-        document.getElementById("showScoreButton").onclick = function () {
+        document.getElementById("button").addEventListener("click", function () {
+            let guess = parseInt(document.getElementById("numberInput").value);
+            guesses++;
+            if (guess === number) {
+                score = Math.max(0, maxChances - guesses + 1);
+                showAlert(`Congratulations! You guessed the number in ${guesses} guesses. Your score is ${score}.`);
+                document.getElementById("retryButton").style.display = 'block';
+                document.getElementById("showScoreButton").style.display = 'block';
+                document.getElementById("leaderboardButton").style.display = 'block';
+                showNamePrompt();
+            } else if (guesses >= maxChances) {
+                showAlert(`Game over! The number was ${number}.`);
+                document.getElementById("retryButton").style.display = 'block';
+                document.getElementById("showScoreButton").style.display = 'block';
+                document.getElementById("leaderboardButton").style.display = 'block';
+            } else {
+                showAlert(`Try again! You've used ${guesses} out of ${maxChances} chances.`);
+            }
+        });
+
+        document.getElementById("retryButton").addEventListener("click", startGame);
+        document.getElementById("showScoreButton").addEventListener("click", function () {
             showAlert(`Your final score is ${score}.`);
-        };
+        });
     </script>
 </body>
 
