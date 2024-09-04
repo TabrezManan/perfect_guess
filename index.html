@@ -146,10 +146,14 @@
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
             border-radius: 10px;
             z-index: 1000;
-            text-align: center;
             width: 80%;
             max-height: 70vh;
             overflow-y: auto;
+        }
+
+        #leaderboard h2 {
+            margin: 0;
+            margin-bottom: 10px;
         }
 
         #leaderboard table {
@@ -181,6 +185,7 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            margin-top: 20px;
         }
 
         #leaderboard button:hover {
@@ -260,7 +265,7 @@
         function updateBackgroundColor(guess) {
             const difference = Math.abs(number - guess);
             if (difference < 7) {
-                document.body.style.backgroundColor = 'rgba(0, 0, 0)'; // Very  Black
+                document.body.style.backgroundColor = 'rgba(0, 0, 0, 0.1)'; // Very Light Black
             } else if (difference < 15) {
                 document.body.style.backgroundColor = 'rgba(0, 255, 0, 0.1)'; // Very Light Green
             } else if (difference < 30) {
@@ -302,8 +307,8 @@
             document.getElementById("retryButton").style.display = 'none';
             document.getElementById("showScoreButton").style.display = 'none';
             document.getElementById("leaderboardButton").style.display = 'none';
-            refocusInput();
             document.body.style.backgroundColor = 'white'; // Reset background color
+            refocusInput();
         }
 
         function submitScore(name, score, guesses) {
