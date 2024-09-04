@@ -148,6 +148,7 @@
             z-index: 1000;
             text-align: center;
             width: 80%;
+            max-height: 70vh;
             overflow-y: auto;
         }
 
@@ -160,6 +161,7 @@
         #leaderboard td {
             border: 1px solid #ddd;
             padding: 10px;
+            text-align: center;
         }
 
         #leaderboard th {
@@ -202,7 +204,7 @@
         <button id="button">Click</button>
         <button id="retryButton">Retry</button>
         <button id="showScoreButton">Show Score</button>
-        <button id="leaderboardButton">Leaderboard</button>
+        <button id="leaderboardButton" onclick="showLeaderboard()">Leaderboard</button>
 
         <!-- Custom Alert Box -->
         <div id="customAlert">
@@ -258,48 +260,14 @@
         function updateBackgroundColor(guess) {
             const difference = Math.abs(number - guess);
             if (difference < 7) {
-                document.body.style.backgroundColor = 'rgba(0, 0, 0, 0.1)'; // Very Light Black
+                document.body.style.backgroundColor = 'rgba(0, 0, 0)'; // Very  Black
             } else if (difference < 15) {
                 document.body.style.backgroundColor = 'rgba(0, 255, 0, 0.1)'; // Very Light Green
             } else if (difference < 30) {
                 document.body.style.backgroundColor = 'rgba(173, 216, 230, 0.1)'; // Very Light Blue
             } else {
-                document.body.style.backgroundColor = '#f0f0f0'; // Default color
+                document.body.style.backgroundColor = 'white'; // Default background color
             }
-        }
-
-        function updateLeaderboard(score, guesses) {
-            const playerName = prompt('Enter your name:');
-            if (playerName) {
-                leaderboard.push({ name: playerName, score: score, guesses: guesses });
-                leaderboard.sort((a, b) => b.score - a.score || a.guesses - b.guesses); // Sort by score, then by guesses
-                if (leaderboard.length > 10) {
-                    leaderboard.pop();
-                }
-                localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
-            }
-        }
-
-        function showLeaderboard() {
-            const leaderboardList = document.getElementById("leaderboardList");
-            leaderboardList.innerHTML = '';
-            leaderboard.forEach((entry, index) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${entry.name}</td>
-                    <td>${entry.score}</td>
-                    <td>${entry.guesses}</td>
-                `;
-                leaderboardList.appendChild(row);
-            });
-            document.getElementById("leaderboard").style.display = 'block';
-            document.body.classList.add('dimmed');
-        }
-
-        function closeLeaderboard() {
-            document.getElementById("leaderboard").style.display = 'none';
-            document.body.classList.remove('dimmed');
         }
 
         function showChanceSelection() {
@@ -307,10 +275,18 @@
         }
 
         function setDifficulty(level) {
-            if (level === 'Easy') maxChances = 10;
-            if (level === 'Medium') maxChances = 7;
-            if (level === 'Hard') maxChances = 5;
             difficulty = level;
+            switch (level) {
+                case 'Easy':
+                    maxChances = 10;
+                    break;
+                case 'Medium':
+                    maxChances = 7;
+                    break;
+                case 'Hard':
+                    maxChances = 5;
+                    break;
+            }
             document.getElementById("chanceSelection").style.top = '-100%';
             setTimeout(() => {
                 document.getElementById("mainContent").style.display = 'flex';
@@ -327,6 +303,37 @@
             document.getElementById("showScoreButton").style.display = 'none';
             document.getElementById("leaderboardButton").style.display = 'none';
             refocusInput();
+            document.body.style.backgroundColor = 'white'; // Reset background color
+        }
+
+        function submitScore(name, score, guesses) {
+            leaderboard.push({ name, score, guesses });
+            leaderboard.sort((a, b) => b.score - a.score); // Sort by score, descending
+            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+        }
+
+        function showLeaderboard() {
+            const leaderboardList = document.getElementById('leaderboardList');
+            leaderboardList.innerHTML = '';
+
+            leaderboard.forEach((entry, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${entry.name}</td>
+                    <td>${entry.score}</td>
+                    <td>${entry.guesses}</td>
+                `;
+                leaderboardList.appendChild(row);
+            });
+
+            document.getElementById('leaderboard').style.display = 'block';
+            document.body.classList.add('dimmed');
+        }
+
+        function closeLeaderboard() {
+            document.getElementById('leaderboard').style.display = 'none';
+            document.body.classList.remove('dimmed');
         }
 
         window.onload = function () {
@@ -337,11 +344,6 @@
             let guess = parseInt(document.getElementById("numberInput").value);
             guesses += 1;
 
-            if (isNaN(guess)) {
-                showAlert("Please enter a valid number.");
-                return;
-            }
-
             updateBackgroundColor(guess);
 
             if (guess > number) {
@@ -349,16 +351,19 @@
             } else if (guess < number) {
                 showAlert("Guess Higher!");
             } else if (guess === number) {
-                score = Math.max(0, maxChances - guesses); // Score is out of 10
+                score = Math.max(0, maxChances - guesses); // Ensure score is never negative
                 showAlert(`You Guessed The Number In ${guesses} Chances`);
                 setTimeout(() => {
-                    showAlert(`Your Score Is ${score} out of 10`);
+                    showAlert(`Your Score Is ${score}`);
                     document.getElementById("showScoreButton").style.display = 'block';
                     document.getElementById("retryButton").style.display = 'block';
                     document.getElementById("leaderboardButton").style.display = 'block';
-                    updateLeaderboard(score, guesses);
                 }, 1000);
-            } else if (guesses >= maxChances) {
+            } else {
+                showAlert("Please enter a valid number.");
+            }
+
+            if (guesses >= maxChances && guess !== number) {
                 setTimeout(() => {
                     showAlert(`You Lost! The Correct Number Was ${number}`);
                     document.getElementById("retryButton").style.display = 'block';
@@ -370,15 +375,15 @@
         });
 
         document.getElementById("retryButton").addEventListener("click", function () {
-            resetGame();
+            const name = prompt('Enter your name:');
+            if (name) {
+                submitScore(name, score, guesses);
+                resetGame();
+            }
         });
 
         document.getElementById("showScoreButton").addEventListener("click", function () {
-            showAlert(`Your Score Is ${score} out of 10`);
-        });
-
-        document.getElementById("leaderboardButton").addEventListener("click", function () {
-            showLeaderboard();
+            showAlert(`Your Score Is ${score}`);
         });
     </script>
 </body>
