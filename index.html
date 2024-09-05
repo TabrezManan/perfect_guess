@@ -320,6 +320,7 @@
         function updateLeaderboard(name, score, guesses) {
             leaderboard.push({ name, score, guesses });
             leaderboard.sort((a, b) => b.score - a.score); // Sort by score in descending order
+            const topScores = leaderboard.slice(0, 5);
             localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
         }
 
