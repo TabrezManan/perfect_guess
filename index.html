@@ -32,7 +32,8 @@
         /* Style the buttons */
         #button,
         #retryButton,
-        #showScoreButton {
+        #showScoreButton,
+        #leaderboardButton {
             font-size: 24px;
             padding: 15px 30px;
             background-color: #4CAF50;
@@ -47,13 +48,15 @@
         /* Add a hover effect */
         #button:hover,
         #retryButton:hover,
-        #showScoreButton:hover {
+        #showScoreButton:hover,
+        #leaderboardButton:hover {
             background-color: #45a049;
         }
 
-        /* Hide the Show Score and Retry buttons initially */
+        /* Hide the Show Score, Retry, and Leaderboard buttons initially */
         #showScoreButton,
-        #retryButton {
+        #retryButton,
+        #leaderboardButton {
             display: none;
         }
 
@@ -130,6 +133,64 @@
         #chanceSelection button:hover {
             background-color: #45a049;
         }
+
+        /* Style for leaderboard */
+        #leaderboard {
+            display: none;
+            position: fixed;
+            top: 10%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            z-index: 1000;
+            width: 80%;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        #leaderboard h2 {
+            margin: 0;
+            margin-bottom: 10px;
+        }
+
+        #leaderboard table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #leaderboard th,
+        #leaderboard td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        #leaderboard th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        #leaderboard tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #leaderboard button {
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        #leaderboard button:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 
@@ -148,6 +209,7 @@
         <button id="button">Click</button>
         <button id="retryButton">Retry</button>
         <button id="showScoreButton">Show Score</button>
+        <button id="leaderboardButton" onclick="showLeaderboard()">Leaderboard</button>
 
         <!-- Custom Alert Box -->
         <div id="customAlert">
@@ -156,12 +218,38 @@
         </div>
     </div>
 
+    <!-- Leaderboard Box -->
+    <div id="leaderboard">
+        <h2>Leaderboard</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Name</th>
+                    <th>Score</th>
+                    <th>Guesses</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboardList">
+                <!-- Leaderboard entries will go here -->
+            </tbody>
+        </table>
+        <button onclick="closeLeaderboard()">Close</button>
+    </div>
+
     <script>
         let number = Math.floor((Math.random() * 100) + 1);
         let guesses = 0;
         let score = 0;
         let maxChances = 10; // Default to 10 chances if none is selected
         let difficulty = 'Easy'; // Default difficulty
+        let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+        let playerName = localStorage.getItem('playerName'); // Store player name
+
+        if (!playerName) {
+            playerName = prompt("Enter your name:");
+            localStorage.setItem('playerName', playerName);
+        }
 
         function refocusInput() {
             setTimeout(() => {
@@ -228,6 +316,34 @@
             refocusInput();
         }
 
+        function updateLeaderboard(name, score, guesses) {
+            leaderboard.push({ name, score, guesses });
+            leaderboard.sort((a, b) => b.score - a.score); // Sort by score in descending order
+            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+        }
+
+        function displayLeaderboard() {
+            const leaderboardList = document.getElementById("leaderboardList");
+            leaderboardList.innerHTML = ''; // Clear the list
+
+            leaderboard.forEach((entry, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td>${index + 1}</td><td>${entry.name}</td><td>${entry.score}</td><td>${entry.guesses}</td>`;
+                leaderboardList.appendChild(row);
+            });
+        }
+
+        function showLeaderboard() {
+            displayLeaderboard();
+            document.getElementById("leaderboard").style.display = 'block';
+            document.body.classList.add('dimmed');
+        }
+
+        function closeLeaderboard() {
+            document.getElementById("leaderboard").style.display = 'none';
+            document.body.classList.remove('dimmed');
+        }
+
         window.onload = function () {
             showChanceSelection();
         };
@@ -247,8 +363,10 @@
                 showAlert(`You Guessed The Number In ${guesses} Chances`);
                 setTimeout(() => {
                     showAlert(`Your Score Is ${score}`);
+                    updateLeaderboard(playerName, score, guesses);
                     document.getElementById("showScoreButton").style.display = 'block';
                     document.getElementById("retryButton").style.display = 'block';
+                    document.getElementById("leaderboardButton").style.display = 'block';
                 }, 1000);
             } else {
                 showAlert("Please enter a valid number.");
