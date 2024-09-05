@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Perfect Guess</title>
     <style>
-        /* Hide the body content initially */
+        /* Existing CSS styles */
         #mainContent {
             display: none;
             justify-content: center;
@@ -18,7 +18,6 @@
             background-color: #f0f0f0;
         }
 
-        /* Style the input field */
         #numberInput {
             font-size: 24px;
             padding: 10px;
@@ -29,7 +28,6 @@
             border: 2px solid #ccc;
         }
 
-        /* Style the buttons */
         #button,
         #retryButton,
         #showScoreButton,
@@ -45,7 +43,6 @@
             margin-top: 20px;
         }
 
-        /* Add a hover effect */
         #button:hover,
         #retryButton:hover,
         #showScoreButton:hover,
@@ -53,14 +50,12 @@
             background-color: #45a049;
         }
 
-        /* Hide the Show Score, Retry, and Leaderboard buttons initially */
         #showScoreButton,
         #retryButton,
         #leaderboardButton {
             display: none;
         }
 
-        /* Style the custom alert box */
         #customAlert {
             display: none;
             position: fixed;
@@ -95,12 +90,10 @@
             background-color: #45a049;
         }
 
-        /* Dim the background when alert is active */
         body.dimmed {
             background-color: rgba(0, 0, 0, 0.5);
         }
 
-        /* Style the chance selection box */
         #chanceSelection {
             position: fixed;
             top: -100%;
@@ -134,13 +127,12 @@
             background-color: #45a049;
         }
 
-        /* Style for leaderboard */
         #leaderboard {
             display: none;
             position: fixed;
             top: 20%;
             left: 50%;
-            transform: translate(-50%, 0);
+            transform: translate(-50%, -50%);
             background-color: white;
             padding: 20px;
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
@@ -196,7 +188,6 @@
 </head>
 
 <body>
-    <!-- Chance Selection Box -->
     <div id="chanceSelection">
         <p>Select Difficulty Level:</p>
         <button onclick="setDifficulty('Easy')">Easy</button>
@@ -204,7 +195,6 @@
         <button onclick="setDifficulty('Hard')">Hard</button>
     </div>
 
-    <!-- Main Game Content -->
     <div id="mainContent">
         <input type="number" id="numberInput" placeholder="Guess The Number" />
         <button id="button">Click</button>
@@ -212,14 +202,12 @@
         <button id="showScoreButton">Show Score</button>
         <button id="leaderboardButton" onclick="showLeaderboard()">Leaderboard</button>
 
-        <!-- Custom Alert Box -->
         <div id="customAlert">
             <p id="alertText"></p>
             <button onclick="closeAlert()">OK</button>
         </div>
     </div>
 
-    <!-- Leaderboard Box -->
     <div id="leaderboard">
         <h2>Leaderboard</h2>
         <table>
@@ -242,15 +230,10 @@
         let number = Math.floor((Math.random() * 100) + 1);
         let guesses = 0;
         let score = 0;
-        let maxChances = 10; // Default to 10 chances if none is selected
-        let difficulty = 'Easy'; // Default difficulty
+        let maxChances = 10;
+        let difficulty = 'Easy';
         let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
-        let playerName = localStorage.getItem('playerName'); // Store player name
-
-        if (!playerName) {
-            playerName = prompt("Enter your name:");
-            localStorage.setItem('playerName', playerName);
-        }
+        let userName = null;
 
         function refocusInput() {
             setTimeout(() => {
@@ -272,13 +255,13 @@
         function updateBackgroundColor(guess) {
             const difference = Math.abs(number - guess);
             if (difference < 7) {
-                document.body.style.backgroundColor = 'rgba(0, 0, 0, 0.8)'; // Very Light Black
+                document.body.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
             } else if (difference < 15) {
-                document.body.style.backgroundColor = 'rgba(0, 255, 0, 0.6)'; // Very Light Green
+                document.body.style.backgroundColor = 'rgba(0, 255, 0, 0.6)';
             } else if (difference < 30) {
-                document.body.style.backgroundColor = 'rgba(173, 216, 230, 0.4)'; // Very Light Blue
+                document.body.style.backgroundColor = 'rgba(173, 216, 230, 0.4)';
             } else {
-                document.body.style.backgroundColor = 'white'; // Default background color
+                document.body.style.backgroundColor = 'white';
             }
         }
 
@@ -313,35 +296,45 @@
             document.getElementById("numberInput").value = '';
             document.getElementById("retryButton").style.display = 'none';
             document.getElementById("showScoreButton").style.display = 'none';
-            document.body.style.backgroundColor = 'white'; // Reset background color
+            document.getElementById("leaderboardButton").style.display = 'none';
+            document.body.style.backgroundColor = 'white';
             refocusInput();
         }
 
-        function updateLeaderboard(name, score, guesses) {
+        function submitScore(name, score, guesses) {
             leaderboard.push({ name, score, guesses });
-            leaderboard.sort((a, b) => b.score - a.score); // Sort by score in descending order
+            leaderboard.sort((a, b) => a.guesses - b.guesses); // Sort by guesses, ascending
             localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
         }
 
-        function displayLeaderboard() {
-            const leaderboardList = document.getElementById("leaderboardList");
-            leaderboardList.innerHTML = ''; // Clear the list
+        function showLeaderboard() {
+            const leaderboardList = document.getElementById('leaderboardList');
+            leaderboardList.innerHTML = '';
 
-            leaderboard.forEach((entry, index) => {
+            // Sort the leaderboard by guesses in ascending order
+            leaderboard.sort((a, b) => a.guesses - b.guesses);
+
+            // Select only the top 5 scores
+            const topScores = leaderboard.slice(0, 5);
+
+            // Create table rows for the top 5 scores
+            topScores.forEach((entry, index) => {
                 const row = document.createElement('tr');
-                row.innerHTML = `<td>${index + 1}</td><td>${entry.name}</td><td>${entry.score}</td><td>${entry.guesses}</td>`;
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${entry.name}</td>
+                    <td>${entry.score}</td>
+                    <td>${entry.guesses}</td>
+                `;
                 leaderboardList.appendChild(row);
             });
-        }
 
-        function showLeaderboard() {
-            displayLeaderboard();
-            document.getElementById("leaderboard").style.display = 'block';
+            document.getElementById('leaderboard').style.display = 'block';
             document.body.classList.add('dimmed');
         }
 
         function closeLeaderboard() {
-            document.getElementById("leaderboard").style.display = 'none';
+            document.getElementById('leaderboard').style.display = 'none';
             document.body.classList.remove('dimmed');
         }
 
@@ -360,11 +353,10 @@
             } else if (guess < number) {
                 showAlert("Guess Higher!");
             } else if (guess === number) {
-                score = Math.max(0, maxChances - guesses); // Ensure score is never negative
+                score = Math.max(0, maxChances - guesses);
                 showAlert(`You Guessed The Number In ${guesses} Chances`);
                 setTimeout(() => {
                     showAlert(`Your Score Is ${score}`);
-                    updateLeaderboard(playerName, score, guesses);
                     document.getElementById("showScoreButton").style.display = 'block';
                     document.getElementById("retryButton").style.display = 'block';
                     document.getElementById("leaderboardButton").style.display = 'block';
@@ -389,7 +381,15 @@
         });
 
         document.getElementById("showScoreButton").addEventListener("click", function () {
-            showAlert(`Your Score Is ${score} Out Of ${maxChances}`);
+            if (!userName) {
+                userName = prompt("Enter your name:");
+                if (!userName) {
+                    showAlert("Name cannot be empty!");
+                    return;
+                }
+            }
+            submitScore(userName, score, guesses);
+            showAlert(`Your Score of ${score} out of ${maxChances} has been saved!`);
         });
     </script>
 </body>
