@@ -317,14 +317,14 @@
             guesses++;
 
             if (guess === number) {
-                showAlert('Congratulations! You guessed the correct number!');
+                showAlert('You Won! You guessed the number in ${guesses} guesses!');
                 document.getElementById("showScoreButton").style.display = 'block';
                 document.getElementById("retryButton").style.display = 'block';
                 document.getElementById("button").disabled = true;
                 document.getElementById("numberInput").disabled = true;
             } else {
                 if (guesses >= maxChances) {
-                    showAlert(`Sorry, you've run out of chances! The correct number was ${number}.`);
+                    showAlert(`You Lost! The correct number was ${number}.`);
                     document.getElementById("retryButton").style.display = 'block';
                     document.getElementById("button").disabled = true;
                     document.getElementById("numberInput").disabled = true;
@@ -334,9 +334,9 @@
                 updateBackgroundColor(guess);
 
                 if (guess < number) {
-                    showAlert('Your guess is too low.');
+                    showAlert('Guess Higher.');
                 } else {
-                    showAlert('Your guess is too high.');
+                    showAlert('Guess Lower.');
                 }
 
                 score -= (difficulty === 'Hard' ? 20 : difficulty === 'Medium' ? 10 : 5);
