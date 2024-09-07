@@ -206,14 +206,6 @@
             <p id="alertText"></p>
             <button onclick="closeAlert()">OK</button>
         </div>
-
-        <div id="scoreDisplay"></div>
-
-        <div id="hintButtons">
-            <button onclick="useHint('range')">Use Range Hint (-25)</button>
-            <button onclick="useHint('hotCold')">Use Hot/Cold Hint (-10)</button>
-            <button onclick="useHint('multiple')">Use Multiple Hint (-15)</button>
-        </div>
     </div>
 
     <div id="leaderboard">
@@ -237,10 +229,9 @@
     <script>
         let number = Math.floor((Math.random() * 100) + 1);
         let guesses = 0;
-        let score = 100;
+        let score = 0;
         let maxChances = 10;
         let difficulty = 'Easy';
-        let hintsUsed = 0;
         let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
         let userName = null;
 
@@ -301,79 +292,33 @@
         function resetGame() {
             number = Math.floor((Math.random() * 100) + 1);
             guesses = 0;
-            hintsUsed = 0;
-            score = 100;
-            document.getElementById("scoreDisplay").innerText = '';
+            score = 0;
+            document.getElementById("numberInput").value = '';
+            document.getElementById("retryButton").style.display = 'none';
+            document.getElementById("showScoreButton").style.display = 'none';
+            document.getElementById("leaderboardButton").style.display = 'none';
             document.body.style.backgroundColor = 'white';
+            refocusInput();
         }
 
-        document.getElementById("button").addEventListener("click", function () {
-            const guess = parseInt(document.getElementById("numberInput").value);
-            if (isNaN(guess)) {
-                showAlert('Please enter a valid number.');
-                return;
-            }
-
-            guesses++;
-
-            if (guess === number) {
-                showAlert('You Won! You guessed the number in ${guesses} guesses!');
-                document.getElementById("showScoreButton").style.display = 'block';
-                document.getElementById("retryButton").style.display = 'block';
-                document.getElementById("button").disabled = true;
-                document.getElementById("numberInput").disabled = true;
-            } else {
-                if (guesses >= maxChances) {
-                    showAlert(`You Lost! The correct number was ${number}.`);
-                    document.getElementById("retryButton").style.display = 'block';
-                    document.getElementById("button").disabled = true;
-                    document.getElementById("numberInput").disabled = true;
-                    return;
-                }
-
-                updateBackgroundColor(guess);
-
-                if (guess < number) {
-                    showAlert('Guess Higher.');
-                } else {
-                    showAlert('Guess Lower.');
-                }
-
-                score -= (difficulty === 'Hard' ? 20 : difficulty === 'Medium' ? 10 : 5);
-            }
-
-            refocusInput();
-        });
-
-        document.getElementById("retryButton").addEventListener("click", function () {
-            resetGame();
-            document.getElementById("numberInput").disabled = false;
-            document.getElementById("button").disabled = false;
-            document.getElementById("showScoreButton").style.display = 'none';
-            document.getElementById("retryButton").style.display = 'none';
-            document.getElementById("numberInput").value = '';
-        });
-
-        document.getElementById("showScoreButton").addEventListener("click", function () {
-            userName = prompt("Enter your name for the leaderboard:");
-            if (userName) {
-                leaderboard.push({
-                    name: userName,
-                    score: score - (hintsUsed * 10),
-                    guesses,
-                    difficulty
-                });
-                leaderboard.sort((a, b) => b.score - a.score); // Sort leaderboard by score (descending)
-                localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
-                showLeaderboard();
-            }
-        });
+        function submitScore(name, score, guesses) {
+            leaderboard.push({ name, score, guesses });
+            leaderboard.sort((a, b) => a.guesses - b.guesses); // Sort by guesses, ascending
+            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+        }
 
         function showLeaderboard() {
-            const leaderboardList = document.getElementById("leaderboardList");
+            const leaderboardList = document.getElementById('leaderboardList');
             leaderboardList.innerHTML = '';
 
-            leaderboard.forEach((entry, index) => {
+            // Sort the leaderboard by guesses in ascending order
+            leaderboard.sort((a, b) => a.guesses - b.guesses);
+
+            // Select only the top 5 scores
+            const topScores = leaderboard.slice(0, 5);
+
+            // Create table rows for the top 5 scores
+            topScores.forEach((entry, index) => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${index + 1}</td>
@@ -384,50 +329,68 @@
                 leaderboardList.appendChild(row);
             });
 
-            document.getElementById("leaderboard").style.display = 'block';
+            document.getElementById('leaderboard').style.display = 'block';
+            document.body.classList.add('dimmed');
         }
 
         function closeLeaderboard() {
-            document.getElementById("leaderboard").style.display = 'none';
+            document.getElementById('leaderboard').style.display = 'none';
+            document.body.classList.remove('dimmed');
         }
 
-        function useHint(type) {
-            let hintMessage = '';
-            hintsUsed += 1;
+        window.onload = function () {
+            showChanceSelection();
+        };
 
-            switch (type) {
-                case 'range':
-                    hintMessage = `The number is between ${number - 10} and ${number + 10}.`;
-                    score -= 25; // Penalty for using a range hint
-                    break;
-                case 'hotCold':
-                    if (Math.abs(number - lastGuess) < 10) {
-                        hintMessage = "You're very close!";
-                    } else {
-                        hintMessage = "You're far away!";
-                    }
-                    score -= 10; // Penalty for using hot/cold hint
-                    break;
-                case 'multiple':
-                    hintMessage = `The number is a multiple of ${getClosestMultiple(number)}.`;
-                    score -= 15; // Penalty for multiple hint
-                    break;
-                default:
-                    hintMessage = "No more hints available!";
+        document.getElementById("button").addEventListener("click", function () {
+            let guess = parseInt(document.getElementById("numberInput").value);
+            guesses += 1;
+
+            updateBackgroundColor(guess);
+
+            if (guess > number) {
+                showAlert("Guess Lower!");
+            } else if (guess < number) {
+                showAlert("Guess Higher!");
+            } else if (guess === number) {
+                score = Math.max(0, maxChances - guesses);
+                showAlert(`You Guessed The Number In ${guesses} Chances`);
+                setTimeout(() => {
+                    showAlert(`Your Score Is ${score}`);
+                    document.getElementById("showScoreButton").style.display = 'block';
+                    document.getElementById("retryButton").style.display = 'block';
+                    document.getElementById("leaderboardButton").style.display = 'block';
+                }, 1000);
+            } else {
+                showAlert("Please enter a valid number.");
             }
 
-            showAlert(hintMessage);
-            updateScoreDisplay();
-        }
+            if (guesses >= maxChances && guess !== number) {
+                setTimeout(() => {
+                    showAlert(`You Lost! The Correct Number Was ${number}`);
+                    document.getElementById("retryButton").style.display = 'block';
+                }, 500);
+            }
 
-        function getClosestMultiple(num) {
-            const divisors = [2, 3, 5, 10];
-            return divisors.find(divisor => num % divisor === 0) || divisors[0];
-        }
+            document.getElementById("numberInput").value = '';
+            refocusInput();
+        });
 
-        function updateScoreDisplay() {
-            document.getElementById("scoreDisplay").innerText = `Score: ${score}`;
-        }
+        document.getElementById("retryButton").addEventListener("click", function () {
+            resetGame();
+        });
+
+        document.getElementById("showScoreButton").addEventListener("click", function () {
+            if (!userName) {
+                userName = prompt("Enter your name:");
+                if (!userName) {
+                    showAlert("Name cannot be empty!");
+                    return;
+                }
+            }
+            submitScore(userName, score, guesses);
+            showAlert(`Your Score is ${score} out of ${maxChances} !`);
+        });
     </script>
 </body>
 
