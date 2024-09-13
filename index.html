@@ -233,6 +233,7 @@
         let difficulty = 'Easy';
         let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
         let userName = null;
+        let maxScore = 100;
 
         function refocusInput() {
             setTimeout(() => {
@@ -352,7 +353,7 @@
             } else if (guess < number) {
                 showAlert("Guess Higher!");
             } else if (guess === number) {
-                score = Math.max(0, maxChances - guesses);
+                score = maxScore*(guesses/maxChances);
                 showAlert(`You Guessed The Number In ${guesses} Chances`);
                 setTimeout(() => {
                     showAlert(`Your Score Is ${score}`);
@@ -388,7 +389,7 @@
                 }
             }
             submitScore(userName, score, guesses);
-            showAlert(`Your Score is ${score} out of ${maxChances} !`);
+            showAlert(`Your Score is ${score} out of ${maxScore} !`);
         });
     </script>
 </body>
