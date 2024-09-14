@@ -311,8 +311,8 @@
             const leaderboardList = document.getElementById('leaderboardList');
             leaderboardList.innerHTML = '';
 
-            // Sort the leaderboard by guesses in ascending order
-            leaderboard.sort((a, b) => a.guesses - b.guesses);
+            // Sort the leaderboard by score in ascending order
+            leaderboard.sort((a, b) => a.score - b.score);
 
             // Select only the top 5 scores
             const topScores = leaderboard.slice(0, 5);
@@ -353,7 +353,7 @@
             } else if (guess < number) {
                 showAlert("Guess Higher!");
             } else if (guess === number) {
-                score = Math.floor(maxScore*(guesses/maxChances));
+                score = Math.floor(maxScore * ((maxChances - guesses + 1) / maxChances));
                 showAlert(`You Guessed The Number In ${guesses} Chances`);
                 setTimeout(() => {
                     showAlert(`Your Score Is ${score}`);
