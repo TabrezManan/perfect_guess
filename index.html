@@ -312,7 +312,7 @@
             leaderboardList.innerHTML = '';
 
             // Sort the leaderboard by score in ascending order
-            leaderboard.sort((a, b) => a.score - b.score);
+            leaderboard.sort((a, b) => b.score - a.score);
 
             // Select only the top 5 scores
             const topScores = leaderboard.slice(0, 5);
