@@ -234,6 +234,7 @@
         let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
         let userName = null;
         let maxScore = 100;
+        let penalty = 20;
 
         function refocusInput() {
             setTimeout(() => {
@@ -274,12 +275,15 @@
             switch (level) {
                 case 'Easy':
                     maxChances = 10;
+                    penalty = 10;
                     break;
                 case 'Medium':
                     maxChances = 7;
+                    penalty = 7;
                     break;
                 case 'Hard':
                     maxChances = 5;
+                    penalty = 5;
                     break;
             }
             document.getElementById("chanceSelection").style.top = '-100%';
@@ -311,7 +315,7 @@
             const leaderboardList = document.getElementById('leaderboardList');
             leaderboardList.innerHTML = '';
 
-            // Sort the leaderboard by score in ascending order
+            // Sort the leaderboard by score in descending order
             leaderboard.sort((a, b) => b.score - a.score);
 
             // Select only the top 5 scores
@@ -353,10 +357,10 @@
             } else if (guess < number) {
                 showAlert("Guess Higher!");
             } else if (guess === number) {
-                score = Math.floor(maxScore * ((maxChances - guesses + 1) / maxChances));
+                score = Math.floor(maxScore * ((guesses -1 )*penalty);
                 showAlert(`You Guessed The Number In ${guesses} Chances`);
                 setTimeout(() => {
-                    showAlert(`Your Score Is ${score}`);
+                    showAlert(`Your Score Is ${score} Out of 100`);
                     document.getElementById("showScoreButton").style.display = 'block';
                     document.getElementById("retryButton").style.display = 'block';
                     document.getElementById("leaderboardButton").style.display = 'block';
