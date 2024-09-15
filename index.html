@@ -357,7 +357,7 @@
             } else if (guess < number) {
                 showAlert("Guess Higher!");
             } else if (guess === number) {
-                score = Math.floor(maxScore * ((guesses -1 )*penalty);
+                score = Math.floor(maxScore - ((guesses - 1) * penalty));
                 showAlert(`You Guessed The Number In ${guesses} Chances`);
                 setTimeout(() => {
                     showAlert(`Your Score Is ${score} Out of 100`);
