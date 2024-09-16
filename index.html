@@ -227,6 +227,7 @@
 
     <script>
         let number = Math.floor((Math.random() * 100) + 1);
+        console.log(number)
         let guesses = 0;
         let score = 0;
         let maxChances = 10;
@@ -234,7 +235,7 @@
         let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
         let userName = null;
         let maxScore = 100;
-        let penalty = 20;
+        let penaltyFactor = null;
 
         function refocusInput() {
             setTimeout(() => {
@@ -275,15 +276,15 @@
             switch (level) {
                 case 'Easy':
                     maxChances = 10;
-                    penalty = 10;
+                    penaltyFactor = 25;
                     break;
                 case 'Medium':
                     maxChances = 7;
-                    penalty = 7;
+                    penaltyFactor = 15;
                     break;
                 case 'Hard':
                     maxChances = 5;
-                    penalty = 5;
+                    penaltyFactor = 5;
                     break;
             }
             document.getElementById("chanceSelection").style.top = '-100%';
@@ -315,8 +316,9 @@
             const leaderboardList = document.getElementById('leaderboardList');
             leaderboardList.innerHTML = '';
 
-            // Sort the leaderboard by score in descending order
+            // Sort by score , descending
             leaderboard.sort((a, b) => b.score - a.score);
+
 
             // Select only the top 5 scores
             const topScores = leaderboard.slice(0, 5);
@@ -346,7 +348,9 @@
             showChanceSelection();
         };
 
-        document.getElementById("button").addEventListener("click", function () {
+
+        function main_logic() {
+
             let guess = parseInt(document.getElementById("numberInput").value);
             guesses += 1;
 
@@ -357,10 +361,10 @@
             } else if (guess < number) {
                 showAlert("Guess Higher!");
             } else if (guess === number) {
-                score = Math.floor(maxScore - ((guesses - 1) * penalty));
+                score = Math.floor(100 - (guesses * penaltyFactor));
                 showAlert(`You Guessed The Number In ${guesses} Chances`);
                 setTimeout(() => {
-                    showAlert(`Your Score Is ${score} Out of 100`);
+                    showAlert(`Your Score Is ${score} out of ${maxScore}`);
                     document.getElementById("showScoreButton").style.display = 'block';
                     document.getElementById("retryButton").style.display = 'block';
                     document.getElementById("leaderboardButton").style.display = 'block';
@@ -378,7 +382,22 @@
 
             document.getElementById("numberInput").value = '';
             refocusInput();
+        }
+
+
+
+        document.getElementById("button").addEventListener("click", function () {
+            main_logic();
         });
+
+        document.addEventListener("keypress", function (event) {
+            if (event.key === "Enter") {
+                main_logic();
+            }
+        });
+
+
+
 
         document.getElementById("retryButton").addEventListener("click", function () {
             resetGame();
@@ -393,7 +412,7 @@
                 }
             }
             submitScore(userName, score, guesses);
-            showAlert(`Your Score is ${score} out of 100 !`);
+            showAlert(`Your Score is ${score} out of ${maxScore} !`);
         });
     </script>
 </body>
